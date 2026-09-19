@@ -1,0 +1,36 @@
+{
+  "benchmark_version": "1.0",
+  "python": "3.12.14",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "data": "Authored synthetic fixtures, 240 evaluation records: 120 known structure + 120 renamed-field structure",
+  "baseline": "Same parsers and validators, fixed aliases, rejects missing required fields; no mapping review/replay",
+  "baseline_correct_valid_records": 120,
+  "traceweave_correct_before_review": 120,
+  "traceweave_correct_after_one_review": 240,
+  "evaluation_records": 240,
+  "negative_records": 4,
+  "negative_records_exported": 0,
+  "replayed_records": 120,
+  "replay_compute_ms": 63.21,
+  "human_review_time": "Not measured",
+  "raw_integrity": {
+    "records": 1252,
+    "verified": 1252,
+    "failed": [],
+    "scope": "Local byte integrity, not proof of origin or tamper-proof storage"
+  },
+  "microbenchmark": {
+    "events": 1000,
+    "storage": "SQLite in memory; durable disk I/O excluded",
+    "events_per_second": 2235.7,
+    "p50_ms": 0.388,
+    "p95_ms": 0.946
+  },
+  "limits": [
+    "No commercial competitor benchmark",
+    "No external vendor holdout",
+    "No statistically calibrated accuracy claim",
+    "No 10x or billion-events/day achievement claim",
+    "The comparison includes an operator-supplied mapping; the baseline can recover too if edited and replayed"
+  ]
+}
