@@ -158,3 +158,169 @@ Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
 Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
 
 - Added: `scripts/install_supabase_cli.py`
+
+## 2026-09-20T05:18:03.434470+00:00
+
+Development server started; automatic file-change tracking enabled
+
+- Modified: `docs/DECISIONS.md`
+- Added: `docs/MODEL_CARD.md`
+- Modified: `docs/NEXT_STEPS.md`
+- Modified: `docs/RESOURCE_MANIFEST.md`
+- Modified: `README.md`
+- Added: `scripts/build_mapping_dataset.py`
+- Modified: `scripts/fetch_public_logs.py`
+- Added: `scripts/train_field_mapper_gpu.py`
+- Added: `tests/test_adapters.py`
+- Added: `tests/test_learning.py`
+- Modified: `traceweave/engine.py`
+- Added: `traceweave/learning.py`
+- Modified: `traceweave/server.py`
+- Modified: `web/app.js`
+- Modified: `web/index.html`
+- Modified: `web/style.css`
+
+## 2026-09-20T05:23:48.399112+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `scripts/install_supabase_cli.py`
+
+## 2026-09-20T05:23:50.418489+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `Dockerfile`
+
+## 2026-09-20T05:28:08.444229+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `traceweave/engine.py`
+- Modified: `traceweave/learning.py`
+
+## 2026-09-20T05:30:01.435451+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Added: `traceweave/cloud.py`
+
+## 2026-09-20T05:30:03.464825+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `traceweave/server.py`
+
+## 2026-09-20T05:31:38.286314+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `traceweave/cloud.py`
+- Modified: `web/app.js`
+- Modified: `web/index.html`
+
+## 2026-09-20T05:31:40.307504+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `web/style.css`
+
+## 2026-09-20T05:32:58.941332+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Added: `tests/test_cloud.py`
+- Modified: `tests/test_server.py`
+
+## 2026-09-20T16:25:43.940933+00:00
+
+Development server started; automatic file-change tracking enabled
+
+- Added: `datasets/model/field_labels.json`
+- Added: `docs/SUPABASE.md`
+- Added: `models/field_mapper.json`
+- Added: `requirements-gpu-lock.txt`
+- Added: `requirements-gpu.txt`
+- Modified: `scripts/changelog.py`
+- Added: `scripts/supabase.ps1`
+- Added: `supabase/config.toml`
+- Added: `supabase/migrations/202609200001_traceweave_revisions.sql`
+- Modified: `web/app.js`
+
+## 2026-09-20T16:28:45.979096+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `docs/ARCHITECTURE.md`
+- Modified: `docs/RESOURCE_MANIFEST.md`
+
+## 2026-09-20T16:28:48.005332+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `docs/VERIFICATION.md`
+- Modified: `README.md`
+
+## 2026-09-20T16:31:45.923543+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `tests/test_server.py`
+
+## 2026-09-20T16:32:26.383585+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `docs/DECISIONS.md`
+- Modified: `docs/NEXT_STEPS.md`
+
+## 2026-09-20T16:34:47.940066+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Added: `scripts/verify_cloud.py`
+
+## 2026-09-20T16:36:18.902106+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `scripts/verify_cloud.py`
+
+## 2026-09-20T16:38:00.026520+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `scripts/verify_cloud.py`
+
+## 2026-09-20T16:39:50.340881+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `docs/NEXT_STEPS.md`
+- Modified: `docs/SUPABASE.md`
+- Modified: `docs/VERIFICATION.md`
+
+## 2026-09-20T16:41:49.745107+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Added: `scripts/build_architecture_pdf.py`
+
+## 2026-09-20T16:43:02.615625+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `scripts/build_architecture_pdf.py`
+
+## 2026-09-20T16:43:04.652592+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `docs/ARCHITECTURE.md`
+- Modified: `README.md`
+
+## 2026-09-20T16:43:06.680967+00:00
+
+Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
+
+- Modified: `docs/VERIFICATION.md`

@@ -1,0 +1,1208 @@
+{
+  "created_at": "2026-09-20T05:13:25.789597+00:00",
+  "hardware": {
+    "index": 0,
+    "name": "AMD Radeon(TM) RX 6500M\u0000"
+  },
+  "available_adapters": [
+    {
+      "index": 0,
+      "name": "AMD Radeon(TM) RX 6500M\u0000"
+    },
+    {
+      "index": 1,
+      "name": "AMD Radeon(TM) Graphics\u0000"
+    }
+  ],
+  "backend": "DirectML",
+  "torch_version": "2.4.1+cpu",
+  "python": "3.12.14",
+  "smoke_test": {
+    "value": 54.0,
+    "gradient_device": "privateuseone:0",
+    "passed": true
+  },
+  "optimizer": "SGD, all parameter updates and gradients on selected DirectML device",
+  "training_seconds": 1.214,
+  "parameter_count": 16448,
+  "gpu_input_bytes": 1390532,
+  "loss_history": [
+    {
+      "epoch": 1,
+      "loss": 2.084275245666504
+    },
+    {
+      "epoch": 101,
+      "loss": 0.08963962644338608
+    },
+    {
+      "epoch": 201,
+      "loss": 0.07426660507917404
+    },
+    {
+      "epoch": 301,
+      "loss": 0.07058882713317871
+    },
+    {
+      "epoch": 401,
+      "loss": 0.06946059316396713
+    },
+    {
+      "epoch": 501,
+      "loss": 0.06906457245349884
+    },
+    {
+      "epoch": 601,
+      "loss": 0.06890963017940521
+    },
+    {
+      "epoch": 701,
+      "loss": 0.06884294003248215
+    },
+    {
+      "epoch": 800,
+      "loss": 0.06881194561719894
+    }
+  ],
+  "split_counts": {
+    "train": 169,
+    "validation": 40,
+    "test": 60
+  },
+  "split_overlap": false,
+  "threshold": 0.65,
+  "margin": 0.4,
+  "validation": {
+    "examples": 40,
+    "suggestions": 25,
+    "correct_suggestions": 25,
+    "incorrect_suggestions": 0,
+    "abstained": 15,
+    "precision_when_suggesting": 1.0,
+    "positive_coverage": 1.0,
+    "top1_accuracy": 0.925,
+    "outcomes": [
+      {
+        "field": "sourceNetworkAddress",
+        "expected": "src_ip",
+        "target": "src_ip",
+        "predicted": "src_ip",
+        "score": 0.7985,
+        "margin": 0.6876,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "clientHostIP",
+        "expected": "src_ip",
+        "target": "src_ip",
+        "predicted": "src_ip",
+        "score": 0.9203,
+        "margin": 0.875,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "source_endpoint_ip",
+        "expected": "src_ip",
+        "target": "src_ip",
+        "predicted": "src_ip",
+        "score": 0.9188,
+        "margin": 0.8774,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "senderIPv4",
+        "expected": "src_ip",
+        "target": "src_ip",
+        "predicted": "src_ip",
+        "score": 0.8674,
+        "margin": 0.7707,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destinationNetworkAddress",
+        "expected": "dst_ip",
+        "target": "dst_ip",
+        "predicted": "dst_ip",
+        "score": 0.8239,
+        "margin": 0.7178,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "serverHostIP",
+        "expected": "dst_ip",
+        "target": "dst_ip",
+        "predicted": "dst_ip",
+        "score": 0.8934,
+        "margin": 0.8238,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destination_endpoint_ip",
+        "expected": "dst_ip",
+        "target": "dst_ip",
+        "predicted": "dst_ip",
+        "score": 0.8701,
+        "margin": 0.798,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "receiverIPv4",
+        "expected": "dst_ip",
+        "target": "dst_ip",
+        "predicted": "dst_ip",
+        "score": 0.9194,
+        "margin": 0.8762,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "srcPortNumber",
+        "expected": "src_port",
+        "target": "src_port",
+        "predicted": "src_port",
+        "score": 0.8341,
+        "margin": 0.7293,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "clientTransportPort",
+        "expected": "src_port",
+        "target": "src_port",
+        "predicted": "src_port",
+        "score": 0.9067,
+        "margin": 0.8732,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "sourceTcpPort",
+        "expected": "src_port",
+        "target": "src_port",
+        "predicted": "src_port",
+        "score": 0.885,
+        "margin": 0.8295,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "dstPortNumber",
+        "expected": "dst_port",
+        "target": "dst_port",
+        "predicted": "dst_port",
+        "score": 0.8282,
+        "margin": 0.7151,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "serverTransportPort",
+        "expected": "dst_port",
+        "target": "dst_port",
+        "predicted": "dst_port",
+        "score": 0.6715,
+        "margin": 0.4772,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destinationTcpPort",
+        "expected": "dst_port",
+        "target": "dst_port",
+        "predicted": "dst_port",
+        "score": 0.8078,
+        "margin": 0.7033,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "trafficDecision",
+        "expected": "action",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.962,
+        "margin": 0.9473,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "packetDecision",
+        "expected": "action",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.9714,
+        "margin": 0.9575,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "firewallVerdict",
+        "expected": "action",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.9182,
+        "margin": 0.889,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "access_action",
+        "expected": "action",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.9085,
+        "margin": 0.8357,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "eventDateTime",
+        "expected": "timestamp",
+        "target": "timestamp",
+        "predicted": "timestamp",
+        "score": 0.9813,
+        "margin": 0.9745,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "observedTime",
+        "expected": "timestamp",
+        "target": "timestamp",
+        "predicted": "timestamp",
+        "score": 0.9654,
+        "margin": 0.9543,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "log_timestamp",
+        "expected": "timestamp",
+        "target": "timestamp",
+        "predicted": "timestamp",
+        "score": 0.961,
+        "margin": 0.9451,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "created_at",
+        "expected": "timestamp",
+        "target": "timestamp",
+        "predicted": "timestamp",
+        "score": 0.9555,
+        "margin": 0.9407,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "transportType",
+        "expected": "protocol",
+        "target": "protocol",
+        "predicted": "protocol",
+        "score": 0.8686,
+        "margin": 0.7975,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "transport_proto",
+        "expected": "protocol",
+        "target": "protocol",
+        "predicted": "protocol",
+        "score": 0.9821,
+        "margin": 0.9774,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "protocolType",
+        "expected": "protocol",
+        "target": "protocol",
+        "predicted": "protocol",
+        "score": 0.9207,
+        "margin": 0.8813,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "source_geo",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9622,
+        "margin": 0.9426,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destination_geo",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9711,
+        "margin": 0.9552,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "message_text",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9864,
+        "margin": 0.9829,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "session_state",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.988,
+        "margin": 0.9854,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "signatureName",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9956,
+        "margin": 0.9945,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "source_nat_address",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "src_ip",
+        "score": 0.4754,
+        "margin": 0.0029,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destination_nat_address",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "dst_ip",
+        "score": 0.5728,
+        "margin": 0.1973,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "ip_address",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "src_ip",
+        "score": 0.4283,
+        "margin": 0.1049,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "port_number",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.5538,
+        "margin": 0.3406,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "timestamp_format",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9266,
+        "margin": 0.8811,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "allowed_count",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9821,
+        "margin": 0.974,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "action_count",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9761,
+        "margin": 0.9642,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "event_count",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9672,
+        "margin": 0.9575,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "eventSource",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9636,
+        "margin": 0.9508,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "originNode",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9795,
+        "margin": 0.9743,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      }
+    ]
+  },
+  "test": {
+    "examples": 60,
+    "suggestions": 41,
+    "correct_suggestions": 39,
+    "incorrect_suggestions": 2,
+    "abstained": 19,
+    "precision_when_suggesting": 0.9512195121951219,
+    "positive_coverage": 0.975,
+    "top1_accuracy": 0.8833333333333333,
+    "outcomes": [
+      {
+        "field": "srcIPv4",
+        "expected": "src_ip",
+        "target": "src_ip",
+        "predicted": "src_ip",
+        "score": 0.9442,
+        "margin": 0.9158,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "sourceHostIP",
+        "expected": "src_ip",
+        "target": "src_ip",
+        "predicted": "src_ip",
+        "score": 0.9324,
+        "margin": 0.8976,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "clientNetworkAddress",
+        "expected": "src_ip",
+        "target": "src_ip",
+        "predicted": "src_ip",
+        "score": 0.8267,
+        "margin": 0.735,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "initiating_ip",
+        "expected": "src_ip",
+        "target": "src_ip",
+        "predicted": "src_ip",
+        "score": 0.8756,
+        "margin": 0.8252,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "packet.source.ip",
+        "expected": "src_ip",
+        "target": "src_ip",
+        "predicted": "src_ip",
+        "score": 0.798,
+        "margin": 0.6945,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "dstIPv4",
+        "expected": "dst_ip",
+        "target": "dst_ip",
+        "predicted": "dst_ip",
+        "score": 0.8673,
+        "margin": 0.7964,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destinationHostIP",
+        "expected": "dst_ip",
+        "target": "dst_ip",
+        "predicted": "dst_ip",
+        "score": 0.898,
+        "margin": 0.8358,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "serverNetworkAddress",
+        "expected": "dst_ip",
+        "target": "dst_ip",
+        "predicted": "dst_ip",
+        "score": 0.8247,
+        "margin": 0.7263,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "responding_ip",
+        "expected": "dst_ip",
+        "target": null,
+        "predicted": "dst_ip",
+        "score": 0.6041,
+        "margin": 0.3126,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "packet.destination.ip",
+        "expected": "dst_ip",
+        "target": "dst_ip",
+        "predicted": "dst_ip",
+        "score": 0.886,
+        "margin": 0.8144,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "sourceTransportPort",
+        "expected": "src_port",
+        "target": "src_port",
+        "predicted": "src_port",
+        "score": 0.8892,
+        "margin": 0.8359,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "clientTcpPort",
+        "expected": "src_port",
+        "target": "src_port",
+        "predicted": "src_port",
+        "score": 0.892,
+        "margin": 0.8444,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "packet.source.port",
+        "expected": "src_port",
+        "target": "src_port",
+        "predicted": "src_port",
+        "score": 0.7719,
+        "margin": 0.6463,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "source_endpoint_port",
+        "expected": "src_port",
+        "target": "src_port",
+        "predicted": "src_port",
+        "score": 0.8738,
+        "margin": 0.8214,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "srcTcpPort",
+        "expected": "src_port",
+        "target": "src_port",
+        "predicted": "src_port",
+        "score": 0.8875,
+        "margin": 0.8244,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "initiating_port",
+        "expected": "src_port",
+        "target": "src_port",
+        "predicted": "src_port",
+        "score": 0.6932,
+        "margin": 0.541,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destinationTransportPort",
+        "expected": "dst_port",
+        "target": "dst_port",
+        "predicted": "dst_port",
+        "score": 0.7015,
+        "margin": 0.5656,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "serverTcpPort",
+        "expected": "dst_port",
+        "target": "dst_port",
+        "predicted": "dst_port",
+        "score": 0.8186,
+        "margin": 0.702,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "packet.destination.port",
+        "expected": "dst_port",
+        "target": "dst_port",
+        "predicted": "dst_port",
+        "score": 0.7496,
+        "margin": 0.5798,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destination_endpoint_port",
+        "expected": "dst_port",
+        "target": "dst_port",
+        "predicted": "dst_port",
+        "score": 0.7594,
+        "margin": 0.6467,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "dstTcpPort",
+        "expected": "dst_port",
+        "target": "dst_port",
+        "predicted": "dst_port",
+        "score": 0.7615,
+        "margin": 0.6112,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "responding_port",
+        "expected": "dst_port",
+        "target": "dst_port",
+        "predicted": "dst_port",
+        "score": 0.725,
+        "margin": 0.5568,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "networkDecision",
+        "expected": "action",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.9385,
+        "margin": 0.9157,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "traffic_verdict",
+        "expected": "action",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.9037,
+        "margin": 0.8718,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "packet_policy_action",
+        "expected": "action",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.9577,
+        "margin": 0.9381,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "accessVerdict",
+        "expected": "action",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.8914,
+        "margin": 0.8279,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "firewallDisposition",
+        "expected": "action",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.9498,
+        "margin": 0.9294,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "decisionTaken",
+        "expected": "action",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.9259,
+        "margin": 0.8983,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "eventCreatedAt",
+        "expected": "timestamp",
+        "target": "timestamp",
+        "predicted": "timestamp",
+        "score": 0.9695,
+        "margin": 0.9566,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "logTime",
+        "expected": "timestamp",
+        "target": "timestamp",
+        "predicted": "timestamp",
+        "score": 0.9597,
+        "margin": 0.9417,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "event_logged_at",
+        "expected": "timestamp",
+        "target": "timestamp",
+        "predicted": "timestamp",
+        "score": 0.9674,
+        "margin": 0.957,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "observationTimestamp",
+        "expected": "timestamp",
+        "target": "timestamp",
+        "predicted": "timestamp",
+        "score": 0.912,
+        "margin": 0.8807,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "occurrenceTime",
+        "expected": "timestamp",
+        "target": "timestamp",
+        "predicted": "timestamp",
+        "score": 0.9482,
+        "margin": 0.932,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "timeOfEvent",
+        "expected": "timestamp",
+        "target": "timestamp",
+        "predicted": "timestamp",
+        "score": 0.9484,
+        "margin": 0.9306,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "packetProtocol",
+        "expected": "protocol",
+        "target": "protocol",
+        "predicted": "protocol",
+        "score": 0.9421,
+        "margin": 0.9258,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "ipTransportProtocol",
+        "expected": "protocol",
+        "target": "protocol",
+        "predicted": "protocol",
+        "score": 0.9856,
+        "margin": 0.981,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "network_transport_name",
+        "expected": "protocol",
+        "target": "protocol",
+        "predicted": "protocol",
+        "score": 0.9438,
+        "margin": 0.9155,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "l4Protocol",
+        "expected": "protocol",
+        "target": "protocol",
+        "predicted": "protocol",
+        "score": 0.9565,
+        "margin": 0.9451,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "transportLayerProtocol",
+        "expected": "protocol",
+        "target": "protocol",
+        "predicted": "protocol",
+        "score": 0.9768,
+        "margin": 0.9718,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "protocolUsed",
+        "expected": "protocol",
+        "target": "protocol",
+        "predicted": "protocol",
+        "score": 0.9331,
+        "margin": 0.9072,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "source_city",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9809,
+        "margin": 0.9709,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destination_city",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9838,
+        "margin": 0.9755,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "source_network_name",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9847,
+        "margin": 0.98,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destination_network_name",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9843,
+        "margin": 0.9791,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "log_message",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9892,
+        "margin": 0.9862,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "record_count",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9562,
+        "margin": 0.9441,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "uptime",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.5935,
+        "margin": 0.4574,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "gateway_id",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9827,
+        "margin": 0.9784,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "endpointAddress",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "src_ip",
+        "score": 0.5866,
+        "margin": 0.2693,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "peer_ip",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "dst_ip",
+        "score": 0.5684,
+        "margin": 0.3193,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "nat_src_ip",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "src_ip",
+        "score": 0.5501,
+        "margin": 0.2242,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "nat_dst_ip",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "dst_ip",
+        "score": 0.495,
+        "margin": 0.1064,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "sourcePortTotal",
+        "expected": "ignore",
+        "target": "src_port",
+        "predicted": "src_port",
+        "score": 0.7046,
+        "margin": 0.4664,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "destinationPortTotal",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "dst_port",
+        "score": 0.6368,
+        "margin": 0.3385,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "timeZone",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9551,
+        "margin": 0.9305,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "eventTimeFormat",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9135,
+        "margin": 0.853,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "actionStatistics",
+        "expected": "ignore",
+        "target": "action",
+        "predicted": "action",
+        "score": 0.8434,
+        "margin": 0.7315,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "rawData",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9784,
+        "margin": 0.9725,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "interfaceName",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.997,
+        "margin": 0.9963,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      },
+      {
+        "field": "severityLevel",
+        "expected": "ignore",
+        "target": null,
+        "predicted": "ignore",
+        "score": 0.9809,
+        "margin": 0.9771,
+        "method": "gpu-trained-field-mapper",
+        "model_version": "field-mapper-dml-1",
+        "review_required": true
+      }
+    ]
+  },
+  "limitations": [
+    "Authored field names and synthetic value shapes, not independent production data.",
+    "Scores are uncalibrated softmax outputs, not probabilities of semantic correctness.",
+    "No automatic approval or normalization of model suggestions.",
+    "Not an LLM; not trained to detect cyberattacks; names alone cannot prove field meaning.",
+    "Inference artifact is portable; training requires the selected GPU. No CPU training fallback is implemented."
+  ],
+  "model_sha256": "1973033fb6f3d7cddb31661d58eddc1923cf43f97dca97aa2e8db7078cf251f8",
+  "model_bytes": 358590
+}

@@ -12,6 +12,8 @@ from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 from .engine import Engine
+from .learning import model_info
+from .cloud import CloudExport
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -43,6 +45,10 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path == "/api/state":
             return self.send(self.server.engine.state())
+        if path == "/api/model":
+            return self.send(model_info())
+        if path == "/api/cloud":
+            return self.send(self.server.cloud.status())
         if path == "/api/verify":
             return self.send(self.server.engine.verify())
         if path == "/api/export":
@@ -78,6 +84,10 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("Request must be a JSON object")
             engine = self.server.engine
             path = urlparse(self.path).path
+            if path == "/api/cloud/check":
+                return self.send(self.server.cloud.check())
+            if path == "/api/cloud/sync":
+                return self.send(self.server.cloud.sync(data.get("include_originals")))
             if path == "/api/ingest":
                 source = data.get("source", "uploaded-device")
                 if isinstance(source, str):
@@ -128,6 +138,7 @@ def main():
     Path(args.db).parent.mkdir(parents=True, exist_ok=True)
     server = HTTPServer(("127.0.0.1", args.port), Handler)
     server.engine = Engine(args.db)
+    server.cloud = CloudExport(server.engine)
     if args.watch_docs:
         from scripts.changelog import watch, record
         record("Development server started; automatic file-change tracking enabled")

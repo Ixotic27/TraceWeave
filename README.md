@@ -47,6 +47,8 @@ Open [the separate workspace](http://127.0.0.1:8766).
 
 Run the Python server to process logs. The existing GitHub Pages workflow publishes static frontend files only; it cannot run this backend. When no backend is available, the page displays connection instructions and disables uploads rather than showing fabricated results. No cloud service is required for local operation.
 
+**Connections** offers optional manual export to your own Supabase project. Export includes reviewed fields and original content; keys stay on the server, and local processing continues without cloud access. Setup and current deployment status are documented in [SUPABASE.md](docs/SUPABASE.md).
+
 ### Local ingestion API
 
 Send JSON to `POST http://127.0.0.1:8765/api/ingest` with a stable `source`, and either `text` or `base64` for original file bytes. `record_mode` accepts `auto`, `lines`, or `single`. Automatic mode recognizes complete JSON objects, flat XML, and a CSV header plus one row; other inputs are split at line boundaries with line endings retained. Existing `single_record` clients remain compatible. Limits: 2 MB per upload, 2,000 records per request and 10,000 records per workspace.
@@ -67,17 +69,18 @@ The benchmark uses synthetic records and a clearly defined fixed-mapping baselin
 ## Documentation
 
 - [Selection, competitors, ranking, blueprint and demo plan](docs/PROBLEM_STATEMENT.md)
-- [Concise architecture](docs/ARCHITECTURE.md)
+- [Concise architecture](docs/ARCHITECTURE.md) and [two-page PDF](output/pdf/TraceWeave-Architecture.pdf)
 - [Exact resources, dependencies and remaining domain inputs](docs/RESOURCE_MANIFEST.md)
 - [Architecture decisions](docs/DECISIONS.md)
 - [Changelog protocol](docs/WORKFLOW.md) and [automatic changelog](docs/CHANGELOG.md)
 - [Verification report](docs/VERIFICATION.md)
+- [GPU training, measured results and limitations](docs/MODEL_CARD.md)
 
 ## Scope
 
 Implemented formats are bounded subsets: JSON objects; key/value records; Syslog with KV payload; CEF header plus a constrained KV extension; LEEF 1.0 tab-separated attributes; flat XML; and a CSV header plus one row. Automatic reading handles complete JSON objects, XML and two-line CSV. Use **Reading options → Entire input is one record** to override detection. Full vendor/RFC grammar coverage and multirow CSV framing are future work.
 
-The custom output schema is `traceweave.network/0.1`; it is not certified or validated OCSF. No LLM or trained ML model is included. Structural changes are detected, but changes in meaning with identical keys/types may require additional domain validation.
+The custom output schema is `traceweave.network/0.1`; it is not certified or validated OCSF. A small GPU-trained model supplies optional, reviewable field suggestions for unfamiliar generic logs. Known vendor rules take precedence; no model suggestion is automatically approved. See [the model card](docs/MODEL_CARD.md) for AMD DirectML training evidence, held-out results and limitations. Structural changes are detected, but changes in meaning with identical keys/types may require additional domain validation.
 
 Data stays in `data/traceweave.sqlite3`. Raw content also appears in result revisions for convenient evidence export, increasing storage overhead. SHA-256 verifies local byte consistency; it does not authenticate a device or prevent a local administrator from altering the database. Enterprise availability, access control, regulatory compliance, and billion-event throughput have not been implemented or established.
 

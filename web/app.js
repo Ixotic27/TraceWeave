@@ -5,10 +5,10 @@ const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp
 const labels = {normalized:'Ready to export', needs_mapping:'Needs review', drift:'Format changed', quarantined:'Couldn’t process'};
 const fieldNames = {src_ip:'Source IP', dst_ip:'Destination IP', action:'Action', src_port:'Source port', dst_port:'Destination port', protocol:'Protocol', timestamp:'Time'};
 const fieldHelp = {src_ip:'Where traffic came from', dst_ip:'Where traffic was going', action:'Whether the device allowed or denied traffic', src_port:'Port used by the sender', dst_port:'Port on the receiving device', protocol:'TCP, UDP, ICMP, or ICMPv6', timestamp:'Date and time, including timezone'};
-const required = ['src_ip','dst_ip','action'];
 let state = {events:[], counts:{}, contracts:[], audit:[], targets:[]};
 let connected = false, loaded = false, refreshing = null, signature = '', filter = 'all', page = 1, selected = null, inputMethod = 'file', chosenFile = null;
 let importing = false;
+let cloudState = null, cloudBusy = false;
 const pageSize = 25;
 const number = value => Number(value || 0).toLocaleString();
 const countText = (value, noun = 'log') => `${number(value)} ${noun}${value === 1 ? '' : 's'}`;
@@ -33,6 +33,7 @@ function setConnection(ok) {
   $('#import-submit').disabled = !ok || importing;
   if ($('#approve')) $('#approve').disabled = !ok;
   if ($('#rollback')) $('#rollback').disabled = !ok;
+  renderCloudButtons();
 }
 async function request(path, payload) {
   let response;
@@ -132,7 +133,8 @@ function renderActivity() {
   $('#activity-list').innerHTML = state.audit.length ? state.audit.map(item => {
     const detail = JSON.parse(item.details);
     const title = item.action === 'mapping_approved' ? 'Field settings saved' : item.action === 'mapping_rollback' ? 'Earlier field settings restored' : item.action.replaceAll('_', ' ');
-    return `<article class="activity-item"><span class="activity-icon" aria-hidden="true">${item.action === 'mapping_rollback' ? '↶' : '✓'}</span><div><h2>${esc(title)}</h2><p>${esc(detail.source || '')} · Settings version ${esc(detail.version || '—')}</p>${detail.validation ? `<small>${countText(detail.validation.length)} checked · ${number(detail.validation.filter(check => check.valid).length)} passed validation</small>` : ''}</div><time datetime="${esc(item.at)}">${esc(new Date(item.at).toLocaleString())}</time></article>`;
+    const description = item.action === 'cloud_export' ? `${countText(detail.records)} sent to ${detail.destination}` : `${detail.source || ''} · Settings version ${detail.version || '—'}`;
+    return `<article class="activity-item"><span class="activity-icon" aria-hidden="true">${item.action === 'mapping_rollback' ? '↶' : '✓'}</span><div><h2>${esc(title)}</h2><p>${esc(description)}</p>${detail.validation ? `<small>${countText(detail.validation.length)} checked · ${number(detail.validation.filter(check => check.valid).length)} passed validation</small>` : ''}</div><time datetime="${esc(item.at)}">${esc(new Date(item.at).toLocaleString())}</time></article>`;
   }).join('') + '<p class="muted">Showing the latest 30 decisions at most.</p>' : '<div class="plain-empty"><span aria-hidden="true">◷</span><h2>Your decisions will appear here</h2><p>When you save field settings or restore a previous version, we’ll record it here.</p></div>';
 }
 function changeView(view) {
@@ -141,7 +143,8 @@ function changeView(view) {
     button.classList.toggle('active', button.dataset.view === view);
     if (button.dataset.view === view) button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current');
   });
-  $('#view-label').textContent = {logs:'Logs', sources:'Sources', activity:'Activity', help:'How it works'}[view];
+  $('#view-label').textContent = {logs:'Logs', sources:'Sources', activity:'Activity', connections:'Connections', help:'How it works'}[view];
+  if (view === 'connections') refreshCloud().catch(error => notify(error.message,true));
 }
 function setFilter(value) {
   filter = value; page = 1;
@@ -171,6 +174,8 @@ function inspect(id) {
   $('#detail-source').textContent = `${row.source} · ${row.format}`;
   $('#detail-title').textContent = `Log #${row.id}`;
   $('#detail-content').innerHTML = `<div class="detail-summary"><span class="status ${row.status}">${labels[row.status]}</span><p>${explanations[row.status]}</p></div><div id="detail-error" class="form-error" role="alert" hidden></div>${errors.length ? `<div class="validation-note"><strong>What needs attention</strong><ul>${errors.map(error => `<li>${esc(friendlyError(error))}</li>`).join('')}</ul></div>` : ''}
+    ${row.ai_suggestions?.length ? `<div class="ai-note"><strong>Local AI suggested ${row.ai_suggestions.length} field matches</strong><p>${row.ai_suggestions.map(item => `${esc(item.field)} → ${esc(fieldNames[item.target])}`).join(' · ')}</p><small>Suggestions can be wrong. Confirm their meaning before saving. AI runs on this computer.</small></div>` : ''}
+    ${row.warnings?.length ? `<div class="validation-note"><strong>About this log type</strong><ul>${row.warnings.map(message => `<li>${esc(message)}</li>`).join('')}</ul></div>` : ''}
     <h3>${row.status === 'normalized' ? 'Reviewed fields' : 'Suggested fields'}</h3><dl class="field-values">${Object.entries(fieldNames).map(([target,label]) => `<div><dt>${label}</dt><dd>${esc(row.canonical[target] ?? 'Not identified')}</dd></div>`).join('')}</dl>
     ${keys.length ? `<details class="mapping-section" ${row.status !== 'normalized' ? 'open' : ''}><summary>${row.status === 'normalized' ? 'Edit field settings' : 'Review field settings'}</summary><p>Match each meaning on the left to a field in your log. Check your device’s documentation if you’re unsure. Required fields must be assigned.</p><div id="mapping-fields">${Object.entries(fieldNames).map(([target,label]) => `<div class="mapping-row"><label for="map-${target}">${label} ${required.includes(target) ? '<span class="required-label">Required</span>' : '<span class="optional-label">Optional</span>'}<small>${fieldHelp[target]}</small></label><select id="map-${target}" data-target="${target}"><option value="">${required.includes(target) ? 'Choose a field…' : 'Leave unassigned'}</option>${keys.map((key,index) => `<option value="${index}" ${mapping[key] === target ? 'selected' : ''}>${esc(key)} — ${esc(String(row.fields[key]).slice(0,80))}</option>`).join('')}</select></div>`).join('')}</div><div class="mapping-footer"><p>Applies to ${countText(matching)} with this structure from <strong>${esc(row.source)}</strong>, plus future matches. Invalid values remain excluded from export.</p><div class="detail-actions"><button class="button primary" id="approve" ${!connected ? 'disabled' : ''}>Save settings & process logs</button>${active && state.contracts.some(rule => rule.source === row.source && rule.fingerprint === row.fingerprint && rule.version < active.version) ? `<button class="button" id="rollback" ${!connected ? 'disabled' : ''}>Restore previous settings</button>` : ''}</div></div></details>` : ''}
     <details class="detail-section"><summary>Original log</summary><p>Exactly what was received. Download preserves the original bytes, including line endings.</p><pre>${esc(row.raw_text)}</pre><button class="button" id="download-raw">↓ Download original</button></details>
@@ -287,3 +292,35 @@ $$('[data-import]').forEach(button => button.disabled = true);
 refresh().catch(() => {});
 setInterval(() => { if (!document.hidden) refresh().catch(() => {}); }, 10000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh().catch(() => {}); });
+
+api('/api/model').then(info => { if (info.available) { $('#ai-overview').hidden = false; $('#ai-overview-text').textContent = `A small local model, trained on ${info.training_device}, helps suggest fields for unfamiliar logs. Known device rules take priority. You review every new structure before export.`; } }).catch(() => {});
+
+function renderCloudButtons() {
+  const usable = connected && cloudState?.configured && !cloudBusy;
+  $('#cloud-check').disabled = !usable;
+  $('#cloud-send').disabled = !usable || !cloudState.pending || !$('#cloud-consent').checked;
+  $('#cloud-consent').disabled = !usable;
+}
+async function refreshCloud() {
+  cloudState = await api('/api/cloud');
+  $('#cloud-status').textContent = cloudState.configured ? (cloudState.connection_verified ? 'Connection checked' : 'Configured · connection not checked') : 'Local only · cloud export is off';
+  $('#cloud-detail').textContent = cloudState.configured ? `Destination: ${cloudState.destination}. Nothing is sent automatically.` : 'A dedicated Supabase project and server configuration are needed to enable this optional connection. You can keep using local uploads, review and file export.';
+  $('#cloud-count').textContent = `${countText(cloudState.pending)} ready for a new cloud export.`;
+  renderCloudButtons();
+}
+$('#cloud-consent').addEventListener('change',renderCloudButtons);
+for (const id of ['cloud-check','cloud-send']) $("#" + id).addEventListener('click',async () => {
+  if (cloudBusy) return;
+  cloudBusy = true; renderCloudButtons();
+  try {
+    if (id === 'cloud-check') { await api('/api/cloud/check',{}); notify('Supabase connection checked. No logs were sent.'); }
+    else {
+      const result = await api('/api/cloud/sync',{include_originals:$('#cloud-consent').checked});
+      $('#cloud-consent').checked = false;
+      notify(`${countText(result.sent)} sent to Supabase. ${countText(result.remaining)} remain for the next batch.`);
+      await refresh();
+    }
+    await refreshCloud();
+  } catch(error) { notify(error.message,true); }
+  finally { cloudBusy = false; renderCloudButtons(); }
+});

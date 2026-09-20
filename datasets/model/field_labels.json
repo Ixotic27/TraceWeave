@@ -1,0 +1,1648 @@
+{
+  "version": 1,
+  "provenance": "Authored field-name supervision based on the project's network taxonomy. Values are synthetic type examples, not captured traffic. Labels are authored expectations, not independent vendor ground truth.",
+  "task": "Map an unfamiliar field name and value shape to one of seven network attributes, or abstain.",
+  "excluded_cross_split_duplicates": [
+    {
+      "field": "sender_port",
+      "split": "validation",
+      "reason": "Normalized name already present in train"
+    },
+    {
+      "field": "receiver_port",
+      "split": "validation",
+      "reason": "Normalized name already present in train"
+    },
+    {
+      "field": "network_protocol",
+      "split": "validation",
+      "reason": "Normalized name already present in train"
+    },
+    {
+      "field": "source_endpoint_address",
+      "split": "test",
+      "reason": "Normalized name already present in train"
+    },
+    {
+      "field": "destination_endpoint_address",
+      "split": "test",
+      "reason": "Normalized name already present in train"
+    }
+  ],
+  "rows": [
+    {
+      "field": "src",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "srcip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "sourceip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "src_ip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "source_ip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "sourceAddress",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "source_address",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "source.ip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "src.address",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "srcHostAddress",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "sourceHost",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "sourceIPv4",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "sourceIPv6",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "client_ip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "clientAddress",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "client.ip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "initiator_ip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "sender_address",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "originating_ip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "sourceEndpointAddress",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "senderIP",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "train"
+    },
+    {
+      "field": "dst",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "dstip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "dest_ip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "destination_ip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "destinationAddress",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "destAddress",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "destination.ip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "dst.address",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "destinationHost",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "remoteDestinationIP",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "destinationIPv4",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "destinationIPv6",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "server_ip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "serverAddress",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "server.ip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "responder_ip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "receiver_address",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "target_ip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "destinationEndpointAddress",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "receiverIP",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "train"
+    },
+    {
+      "field": "spt",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "srcport",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "sourceport",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "src_port",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "source_port",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "source.port",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "src.transportPort",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "sourcePortNumber",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "client_port",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "clientPort",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "client.port",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "initiator_port",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "senderPort",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "outboundSourcePort",
+      "value": 50000,
+      "label": "src_port",
+      "split": "train"
+    },
+    {
+      "field": "dpt",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "dstport",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "destport",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "dst_port",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "dest_port",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "destination_port",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "destination.port",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "destinationPortNumber",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "server_port",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "serverPort",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "server.port",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "responder_port",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "receiverPort",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "targetPort",
+      "value": 443,
+      "label": "dst_port",
+      "split": "train"
+    },
+    {
+      "field": "action",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "act",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "verdict",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "decision",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "policyAction",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "firewallAction",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "firewall_decision",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "traffic_action",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "packetAction",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "disposition",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "accessDecision",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "ruleAction",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "connectionAction",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "eventDecision",
+      "value": "deny",
+      "label": "action",
+      "split": "train"
+    },
+    {
+      "field": "timestamp",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "event_time",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "eventTime",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "time",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "eventTimestamp",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "occurred_at",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "observed_at",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "logged_at",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "recordedAt",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "event_date",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "dateTime",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "timeGenerated",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "timeCreated",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "event.time",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "utcTimestamp",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "train"
+    },
+    {
+      "field": "proto",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "protocol",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "transport",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "transport_protocol",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "networkProtocol",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "ipProtocol",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "transportProtocol",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "protocol_name",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "ip_proto",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "network.transport",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "ip.protocol",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "transportName",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "train"
+    },
+    {
+      "field": "message",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "msg",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "rule",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "ruleid",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "ruleName",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "policyid",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "policyName",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "session_id",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "sessionid",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "deviceid",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "hostname",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "username",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "user",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "password",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "signature",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "signature_id",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "alert_action",
+      "value": "deny",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "severity",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "category",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "interface",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "srcintf",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "dstintf",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "srcmac",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "dstmac",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "source_country",
+      "value": 10,
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "destination_country",
+      "value": 10,
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "bytes",
+      "value": 10,
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "sentbyte",
+      "value": 10,
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "receivedbyte",
+      "value": 10,
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "packets",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "source_nat_ip",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "destination_nat_ip",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "source_port_count",
+      "value": 10,
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "destination_port_count",
+      "value": 10,
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "flow_id",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "count",
+      "value": 10,
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "duration",
+      "value": 10,
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "process_id",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "process_name",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "application",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "app",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "vendor",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "event_type",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "status",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "source_interface",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "destination_interface",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "user_agent",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "address",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "ip",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "port",
+      "value": 10,
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "origin",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "target",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "data",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "payload",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "metadata",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "label",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "name",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "state",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "error_code",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "train"
+    },
+    {
+      "field": "sourceNetworkAddress",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "validation"
+    },
+    {
+      "field": "clientHostIP",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "validation"
+    },
+    {
+      "field": "source_endpoint_ip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "validation"
+    },
+    {
+      "field": "senderIPv4",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "validation"
+    },
+    {
+      "field": "destinationNetworkAddress",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "validation"
+    },
+    {
+      "field": "serverHostIP",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "validation"
+    },
+    {
+      "field": "destination_endpoint_ip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "validation"
+    },
+    {
+      "field": "receiverIPv4",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "validation"
+    },
+    {
+      "field": "srcPortNumber",
+      "value": 50000,
+      "label": "src_port",
+      "split": "validation"
+    },
+    {
+      "field": "clientTransportPort",
+      "value": 50000,
+      "label": "src_port",
+      "split": "validation"
+    },
+    {
+      "field": "sourceTcpPort",
+      "value": 50000,
+      "label": "src_port",
+      "split": "validation"
+    },
+    {
+      "field": "dstPortNumber",
+      "value": 443,
+      "label": "dst_port",
+      "split": "validation"
+    },
+    {
+      "field": "serverTransportPort",
+      "value": 443,
+      "label": "dst_port",
+      "split": "validation"
+    },
+    {
+      "field": "destinationTcpPort",
+      "value": 443,
+      "label": "dst_port",
+      "split": "validation"
+    },
+    {
+      "field": "trafficDecision",
+      "value": "deny",
+      "label": "action",
+      "split": "validation"
+    },
+    {
+      "field": "packetDecision",
+      "value": "deny",
+      "label": "action",
+      "split": "validation"
+    },
+    {
+      "field": "firewallVerdict",
+      "value": "deny",
+      "label": "action",
+      "split": "validation"
+    },
+    {
+      "field": "access_action",
+      "value": "deny",
+      "label": "action",
+      "split": "validation"
+    },
+    {
+      "field": "eventDateTime",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "validation"
+    },
+    {
+      "field": "observedTime",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "validation"
+    },
+    {
+      "field": "log_timestamp",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "validation"
+    },
+    {
+      "field": "created_at",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "validation"
+    },
+    {
+      "field": "transportType",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "validation"
+    },
+    {
+      "field": "transport_proto",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "validation"
+    },
+    {
+      "field": "protocolType",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "validation"
+    },
+    {
+      "field": "source_geo",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "destination_geo",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "message_text",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "session_state",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "signatureName",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "source_nat_address",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "destination_nat_address",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "ip_address",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "port_number",
+      "value": 10,
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "timestamp_format",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "allowed_count",
+      "value": 10,
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "action_count",
+      "value": 10,
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "event_count",
+      "value": 10,
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "eventSource",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "originNode",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "validation"
+    },
+    {
+      "field": "srcIPv4",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "test"
+    },
+    {
+      "field": "sourceHostIP",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "test"
+    },
+    {
+      "field": "clientNetworkAddress",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "test"
+    },
+    {
+      "field": "initiating_ip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "test"
+    },
+    {
+      "field": "packet.source.ip",
+      "value": "192.0.2.1",
+      "label": "src_ip",
+      "split": "test"
+    },
+    {
+      "field": "dstIPv4",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "test"
+    },
+    {
+      "field": "destinationHostIP",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "test"
+    },
+    {
+      "field": "serverNetworkAddress",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "test"
+    },
+    {
+      "field": "responding_ip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "test"
+    },
+    {
+      "field": "packet.destination.ip",
+      "value": "198.51.100.2",
+      "label": "dst_ip",
+      "split": "test"
+    },
+    {
+      "field": "sourceTransportPort",
+      "value": 50000,
+      "label": "src_port",
+      "split": "test"
+    },
+    {
+      "field": "clientTcpPort",
+      "value": 50000,
+      "label": "src_port",
+      "split": "test"
+    },
+    {
+      "field": "packet.source.port",
+      "value": 50000,
+      "label": "src_port",
+      "split": "test"
+    },
+    {
+      "field": "source_endpoint_port",
+      "value": 50000,
+      "label": "src_port",
+      "split": "test"
+    },
+    {
+      "field": "srcTcpPort",
+      "value": 50000,
+      "label": "src_port",
+      "split": "test"
+    },
+    {
+      "field": "initiating_port",
+      "value": 50000,
+      "label": "src_port",
+      "split": "test"
+    },
+    {
+      "field": "destinationTransportPort",
+      "value": 443,
+      "label": "dst_port",
+      "split": "test"
+    },
+    {
+      "field": "serverTcpPort",
+      "value": 443,
+      "label": "dst_port",
+      "split": "test"
+    },
+    {
+      "field": "packet.destination.port",
+      "value": 443,
+      "label": "dst_port",
+      "split": "test"
+    },
+    {
+      "field": "destination_endpoint_port",
+      "value": 443,
+      "label": "dst_port",
+      "split": "test"
+    },
+    {
+      "field": "dstTcpPort",
+      "value": 443,
+      "label": "dst_port",
+      "split": "test"
+    },
+    {
+      "field": "responding_port",
+      "value": 443,
+      "label": "dst_port",
+      "split": "test"
+    },
+    {
+      "field": "networkDecision",
+      "value": "deny",
+      "label": "action",
+      "split": "test"
+    },
+    {
+      "field": "traffic_verdict",
+      "value": "deny",
+      "label": "action",
+      "split": "test"
+    },
+    {
+      "field": "packet_policy_action",
+      "value": "deny",
+      "label": "action",
+      "split": "test"
+    },
+    {
+      "field": "accessVerdict",
+      "value": "deny",
+      "label": "action",
+      "split": "test"
+    },
+    {
+      "field": "firewallDisposition",
+      "value": "deny",
+      "label": "action",
+      "split": "test"
+    },
+    {
+      "field": "decisionTaken",
+      "value": "deny",
+      "label": "action",
+      "split": "test"
+    },
+    {
+      "field": "eventCreatedAt",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "test"
+    },
+    {
+      "field": "logTime",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "test"
+    },
+    {
+      "field": "event_logged_at",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "test"
+    },
+    {
+      "field": "observationTimestamp",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "test"
+    },
+    {
+      "field": "occurrenceTime",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "test"
+    },
+    {
+      "field": "timeOfEvent",
+      "value": "2026-09-20T00:00:00Z",
+      "label": "timestamp",
+      "split": "test"
+    },
+    {
+      "field": "packetProtocol",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "test"
+    },
+    {
+      "field": "ipTransportProtocol",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "test"
+    },
+    {
+      "field": "network_transport_name",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "test"
+    },
+    {
+      "field": "l4Protocol",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "test"
+    },
+    {
+      "field": "transportLayerProtocol",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "test"
+    },
+    {
+      "field": "protocolUsed",
+      "value": "tcp",
+      "label": "protocol",
+      "split": "test"
+    },
+    {
+      "field": "source_city",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "destination_city",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "source_network_name",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "destination_network_name",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "log_message",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "record_count",
+      "value": 10,
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "uptime",
+      "value": 10,
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "gateway_id",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "endpointAddress",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "peer_ip",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "nat_src_ip",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "nat_dst_ip",
+      "value": "192.0.2.30",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "sourcePortTotal",
+      "value": 10,
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "destinationPortTotal",
+      "value": 10,
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "timeZone",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "eventTimeFormat",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "actionStatistics",
+      "value": "deny",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "rawData",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "interfaceName",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    },
+    {
+      "field": "severityLevel",
+      "value": "unknown",
+      "label": "ignore",
+      "split": "test"
+    }
+  ]
+}

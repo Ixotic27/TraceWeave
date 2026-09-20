@@ -1,0 +1,24 @@
+{
+  "at": "2026-09-20T16:38:03.070605+00:00",
+  "project_ref": "dlyxamexvbewnniwaime",
+  "checks": {
+    "public_key_valid": true,
+    "database_access_controls": {
+      "anon_select": false,
+      "authenticated_select": false,
+      "rls_enabled": true,
+      "server_delete": false,
+      "server_insert": true,
+      "server_update": false
+    },
+    "connection": true,
+    "review_gate": true,
+    "raw_round_trip": true,
+    "duplicate_retry": true,
+    "anonymous_get_denied": 401,
+    "anonymous_post_denied": 401,
+    "server_patch_denied": 403,
+    "server_delete_denied": 403,
+    "verification_rows_removed": true
+  }
+}

@@ -17,7 +17,7 @@ def get(url, cap):
 
 release=json.loads(get("https://api.github.com/repos/supabase/cli/releases/latest",2000000))
 assets={a["name"]:a["browser_download_url"] for a in release["assets"]}
-name="supabase_windows_amd64.tar.gz"
+name=f"supabase_{release['tag_name'].removeprefix('v')}_windows_amd64.tar.gz"
 checksums=next(value for key,value in assets.items() if key.endswith("checksums.txt"))
 expected=next(line.split()[0] for line in get(checksums,200000).decode().splitlines() if line.split()[-1].lstrip('*')==name)
 payload=get(assets[name],100000000)

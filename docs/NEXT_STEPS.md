@@ -1,6 +1,6 @@
 # Remaining work and free data sources
 
-Updated 19 September 2026 in response to the user's request for remaining work, required data, and where to obtain it. This is a planning update; it does not claim that the proposed adapters have been built or that the public samples have been downloaded.
+Updated 20 September 2026. This page distinguishes delivered functionality from work that still needs evidence.
 
 ## Current status
 
@@ -8,21 +8,21 @@ The local application implements raw retention, constrained format parsers, sour
 
 ## Build priorities
 
-September 20 checkpoint: initial FortiGate/pfSense/Suricata profiles and event-specific field requirements are now implemented with 150 pinned public reference records kept outside the UI. Four records remain unsupported in the initial development check. Full vendor coverage, independent field validation, AI training, Supabase setup and live collection remain work in progress. The user requested this checkpoint be committed and pushed before AI work continues.
+September 20 checkpoint: initial FortiGate/pfSense/Suricata profiles and event-specific field requirements are implemented with 150 pinned public reference records kept outside the UI. Four records remain unsupported in the initial development check. The pre-model checkpoint was committed and pushed. A field-mapping classifier was then trained on the AMD RX 6500M with DirectML and integrated behind the review gate. A dedicated Free Supabase project is connected, with a migrated server-only table and a verified cloud round trip; SUPABASE.md records the details. Full vendor coverage, independent field validation and live collection remain incomplete.
 
 | Priority | Work remaining | Evidence needed to call it done |
 | --- | --- | --- |
 | 1 | Add and verify FortiGate traffic, pfSense filterlog, and Suricata event adapters | Source samples and documented expected meanings pass independent field checks; unsupported event types are explicit |
-| 1 | Use event-specific schema requirements | Firewall decisions, passive connections and alerts are distinguished; unavailable action/verdict is never invented |
+| Delivered | Event-specific schema requirements and initial GPU field model | Semantic regression checks pass; model evidence and authored holdout limits are in MODEL_CARD.md |
 | 1 | Add pinned OCSF export and schema validation | Validate against the selected release and event classes; preserve raw/unmapped data |
 | 2 | Add one live local ingestion path | File tail or TCP syslog feeds the app, handles incomplete records, survives restart and accounts for retained/rejected input |
 | 2 | Strengthen drift and malformed-input validation | Exercise real field/version variation, escaped values, arrays, timestamps, optional fields and same-shaped semantic changes |
 | 2 | Run an independent benchmark | Separate development and evaluation source/version sets; measure field correctness, coverage, review time and durable replay/ingest throughput |
 | 2 | Complete packaging and submission artifacts | Verify offline startup on a clean target machine; produce the two-page architecture PDF, five slides, two-minute video and source repository |
-| Optional | Add a free local-model mapping proposer | Show improved reviewer effort on held-out examples; no automatic promotion of unverified model output |
+| 2 | Expand model evaluation beyond authored names | Independently labeled vendor/device holdouts and measured reviewer effort; no automatic promotion of unverified output |
 | Later production | Distributed ingest, storage/retention, access control and evidence trust anchors | End-to-end durability, capacity and operational validation; a laptop demo cannot establish these properties |
 
-Broad multirow CSV and complete vendor/CEF/Syslog grammar support remain incomplete. The existing app supports only documented subsets. A full local model or autonomous parser-learning system has not been implemented.
+Broad multirow CSV and complete vendor/CEF/Syslog grammar support remain incomplete. The existing app supports only documented subsets. A small local field classifier is implemented; autonomous parser generation and an LLM are not.
 
 ## Free starter data
 
@@ -49,7 +49,7 @@ Start with the documented alert/flow examples. The verification repository provi
 
 Important semantic requirement: the EVE documentation states that an alert's action does not necessarily describe the final packet/flow verdict. Preserve that distinction. Similarly, a passive connection record must not acquire a fabricated firewall allow/deny value merely to satisfy the current demo schema.
 
-These are public documentation and integration-test fixtures, not independently sampled production deployments. Keep their attribution and version/commit references. Logs used to tune adapters must not also be advertised as unseen benchmark data. No data download or integration was performed during this status-and-planning update.
+These are public documentation and integration-test fixtures, not independently sampled production deployments. Keep their attribution and version/commit references. Logs used to tune adapters must not also be advertised as unseen benchmark data. 150 raw records plus companion expected outputs and license material are now pinned under datasets/public/; they are not injected into the application.
 
 ## What to collect
 
@@ -64,7 +64,7 @@ No attack/benign labels, model-training GPU, paid API or enormous intrusion-dete
 ## Inputs that need the user or a domain contact
 
 1. Submission deadline and the current official PS/rubric from the SIH portal or college SPOC. The research tool could not retrieve the official 2026 portal in the initial analysis.
-2. Evaluation laptop RAM, CPU and operating system, so packaging and performance tests match the demo machine.
+2. Confirm a submission deadline and whether another evaluation machine must be supported. Current development hardware is Windows, 16 GB RAM and an AMD RX 6500M with 4 GB graphics memory.
 3. Optional: an authorized, sanitized sample from a college firewall/network lab, with product/version and an IT/lab reviewer who can confirm field meanings. Consistent anonymization should preserve field structure and relationships; remove secrets and unnecessary personal content.
 
 Public sample collection, adapter implementation, labels drafted from manuals, synthetic mutation generation, schema validation and benchmarking can be handled within the project. A domain reviewer provides stronger independent confirmation but is not required to continue from public examples.

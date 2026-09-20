@@ -113,3 +113,23 @@ The next delivery adds versioned FortiGate, pfSense filterlog and Suricata EVE p
 150 public Elastic integration fixtures with pinned hashes, expected output companions and license texts were downloaded separately from the empty user workspace. Initial development checks produce 146 candidates passing current field validation; four remain excluded because of unsupported escapes, malformed quoting or protocol vocabulary. This is coverage of the development corpus, not independent accuracy or trained-model performance. Four semantic regression tests were added; all 40 tests pass at the pre-model checkpoint.
 
 AI remains a later optional suggestion component with mandatory human review. Supabase setup is in progress at the user's request; no cloud connection or model is claimed by this checkpoint. The official npm installer encountered a certificate validation error; verification was not disabled.
+
+## ADR-010 — Train the mapping assistant on AMD DirectML
+
+Date: 20 September 2026. Status: implemented; supersedes the optional-model status in ADR-009.
+
+The user explicitly required GPU training after the pre-model code checkpoint was pushed to GitHub. Installed pinned PyTorch DirectML packages in an ignored project environment and selected the AMD RX 6500M explicitly. A small 16,448-parameter supervised field classifier fits the 4 GB GPU comfortably without an LLM fine-tuning stack. Training fails on operator fallback warnings and verifies gradients remain on the selected GPU.
+
+169 authored training examples, 40 validation examples and 60 held-out examples have disjoint normalized field names. Validation selects abstention thresholds. The test produced 39 correct and two incorrect suggestions, with 19 abstentions. Incorrect suggestions are documented rather than hidden or tuned away using the test set. The task is name/type generalization on authored data, not independent vendor validation. Dataset and weights are hashed in the evidence report.
+
+The integration uses learned suggestions only after exact aliases, only for generic profiles, with value validation and ambiguous-candidate abstention. Mandatory source review and export gating remain unchanged. Runtime inference is a small, local, dependency-free weight calculation; GPU acceleration is required for the training script. Missing/invalid model data does not prevent manual parsing/review. A JSON artifact avoids executable model serialization.
+
+Validation: 46 automated checks passed after integration, including GPU-artifact provenance, split leakage, unapproved-export exclusion, alias precedence, conflicting suggestions, invalid values, missing-model behavior and vendor-profile isolation. See MODEL_CARD.md and evidence/gpu-training.json.
+
+## ADR-011 — Optional, explicit Supabase export
+
+Date: 20 September 2026. Status: code implemented; deployment state in SUPABASE.md.
+
+The user requested CLI setup and a dedicated project only if free. SQLite remains primary for air-gapped use. The browser never receives server secrets. Only reviewed latest revisions are sent, with retained originals and lineage, after an explicit action identifying that scope. Batches are bounded; a stable local workspace UUID and revision key make retries idempotent. Receipts advance only after remote success. Earlier cloud revisions are retained, so this is an export rather than a full backup or collaborative editing system.
+
+The migration denies anonymous/authenticated access and grants the server role SELECT and INSERT only. Redirects are refused, TLS verification remains enabled, and errors exclude remote response bodies. Cloud export is off until configured. Unit tests use a controlled transport and ordinary HTTP integration tests force cloud off even when a developer has a real .env file.

@@ -11,7 +11,7 @@ from pathlib import Path
 class ServerTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.process = subprocess.Popen([sys.executable, "-m", "traceweave.server", "--port", "0", "--db", ":memory:"], cwd=Path(__file__).resolve().parents[1], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
+        cls.process = subprocess.Popen([sys.executable, "-m", "traceweave.server", "--port", "0", "--db", ":memory:"], cwd=Path(__file__).resolve().parents[1], env={**os.environ,"TRACEWEAVE_CLOUD_ENABLED":"0"}, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
         line = cls.process.stdout.readline().strip()
         if not line.startswith("TraceWeave ready at"):
             cls.process.terminate()
@@ -37,6 +37,16 @@ class ServerTests(unittest.TestCase):
             status, body = self.request("GET", path)
             self.assertEqual(status,200)
             self.assertTrue(body)
+
+    def test_model_and_disabled_cloud_status(self):
+        status, body = self.request("GET", "/api/model")
+        self.assertEqual(status,200)
+        self.assertTrue(json.loads(body)['available'])
+        status, body = self.request("GET", "/api/cloud")
+        self.assertEqual(status,200)
+        self.assertFalse(json.loads(body)['configured'])
+        self.assertEqual(self.request("POST", "/api/cloud/check", {})[0],400)
+        self.assertEqual(self.request("POST", "/api/cloud/sync", {})[0],400)
 
     def test_cross_origin_request_rejected(self):
         status, _ = self.request("POST", "/api/demo", {"mode":"samples"}, {"Origin":"https://untrusted.example"})

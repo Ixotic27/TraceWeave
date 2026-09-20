@@ -4,6 +4,8 @@ data/
 *.sqlite3
 .pytest_cache/
 .venv/
+.venv-gpu/
+tmp/
 .env
 .env.*
 !.env.example

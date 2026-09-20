@@ -1,2 +1,7 @@
 # Preserve downloaded provenance hashes on Windows checkouts.
 datasets/public/** -text
+# Model/evidence hashes must survive Windows and Linux checkouts unchanged.
+datasets/model/** text eol=lf
+models/** text eol=lf
+docs/evidence/gpu-training.json text eol=lf
+*.pdf binary

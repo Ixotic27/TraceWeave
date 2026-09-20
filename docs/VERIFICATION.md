@@ -2,6 +2,18 @@
 
 Updated: 20 September 2026 (Asia/Calcutta). Runtime: Python 3.12.14 on Windows. These are local behavior checks, not production certification.
 
+## GPU model and optional cloud export
+
+**54 tests pass** after vendor profiles, GPU-model integration and optional cloud export were added. JavaScript syntax and diff whitespace checks also pass. Cloud transport tests exercise bounded batches, review/consent gates, original retention, retries, receipt persistence, destination isolation, credential-safe errors and redirect rejection.
+
+Separately, the dedicated Free Supabase project was created via CLI after verifying the signed-in dashboard's plan. The migration was applied after a dry run. Real cloud verification passed: valid public key, RLS enabled, anonymous/authenticated SELECT denied in grants, server INSERT allowed but UPDATE/DELETE denied, raw-byte round trip, review gate and remote retry deduplication. The temporary verification workspace was deleted through the CLI and its absence checked. See evidence/cloud-verification.json. No production/user log was uploaded by verification.
+
+The field classifier was trained on the AMD Radeon RX 6500M using DirectML, with a GPU matrix/backpropagation probe, gradient-device assertions and no CPU fallback. Evidence hashes match the committed dataset/model files. Its 60-example authored holdout produced 39 correct suggestions, two incorrect suggestions and 19 abstentions. These are small synthetic field-name results, not real-device accuracy. Full details: MODEL_CARD.md and evidence/gpu-training.json.
+
+An isolated in-memory browser workspace accepted an unfamiliar three-field record, displayed three labeled local-AI suggestions and kept export disabled. After explicit review, one record became Ready to export. The help page identified the RX 6500M training device. The main workspace remained empty. Earlier browser evidence below describes earlier versions where noted.
+
+The main app's Connections page successfully checked the configured Supabase table and kept sending disabled with zero records. The first check failed because the development server was running without network permission; restarting that localhost-only server with authorized network access resolved it. No TLS verification was disabled. The two-page architecture PDF was rendered and both pages visually checked.
+
 ## Current interface migration
 
 The current UI starts empty, exposes no sample-loading or benchmark controls, and has no simulated API fallback. `web/demo-data.js` was removed. A case-insensitive scan of `web/` for SIH, prototype, demo, mock, fixture and benchmark returns no matches.

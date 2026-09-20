@@ -24,11 +24,11 @@ CSV currently accepts one header plus one data row as a single record. XML suppo
 
 ## Models and APIs
 
-**Required LLMs: none. Required vision models: none. Third-party APIs: none.** The evidence image is an input to selection, not a reason to put multimodal inference into the product. Alias suggestions are deterministic and must not be presented as trained AI.
+**Required LLMs: none. Required vision models: none. Third-party runtime APIs: none.** A small trained field-mapping classifier is now included; see MODEL_CARD.md. Its weights were trained on the AMD RX 6500M using the isolated DirectML environment and run locally without framework dependencies. Exact aliases remain deterministic; the UI distinguishes learned suggestions. Public vendor fixtures remain separate from authored model supervision.
 
-Optional future proposer: [Qwen/Qwen3-0.6B](https://huggingface.co/Qwen/Qwen3-0.6B/tree/main), whose publisher lists Apache-2.0 licensing. Run locally on CPU after a one-time download; evaluate whether it improves mapping suggestions enough to justify the dependency. A small model may be inadequate for complex device semantics. Pin the exact model revision and inspect its license, memory use, and measured quality before adoption. No model has been downloaded or integrated.
+Training dependencies: `requirements-gpu.txt` and the recorded lock file. The installed isolated environment uses PyTorch 2.4.1, torch-directml 0.2.5.dev240914 and NumPy 1.26.4 on the AMD RX 6500M. Training refuses a CPU fallback. The dataset has 169 authored training examples, 40 validation examples and 60 held-out examples; it is not production telemetry. No LLM, CUDA stack or model-service key is needed.
 
-Optional execution runtime: [llama.cpp](https://github.com/ggml-org/llama.cpp), an official project to evaluate for quantized local inference. This is a future option, not a current install requirement. The normal ingestion path must continue to run if model inference is disabled or fails.
+Optional Supabase export uses standard-library HTTPS and server-only credentials in ignored `.env`. The CLI and migration are prepared; see SUPABASE.md for actual connection status. Supabase is not required for local operation or air-gapped deployment.
 
 ## Open data and standards for the next validation step
 

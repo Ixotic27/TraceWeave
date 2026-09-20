@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree as ET
 from .adapters import pfsense_record, profile_for, profile_value
+from .learning import propose
 
 TARGETS = ("src_ip", "dst_ip", "src_port", "dst_port", "action", "timestamp", "protocol")
 REQUIRED = ("src_ip", "dst_ip", "action")
@@ -201,7 +202,8 @@ def normalize(fields, mapping, profile=None):
 
 
 class Engine:
-    def __init__(self, path=":memory:"):
+    def __init__(self, path=":memory:", use_model=True):
+        self.use_model = use_model
         self.db = sqlite3.connect(path)
         self.db.row_factory = sqlite3.Row
         self.db.executescript("""
@@ -239,6 +241,12 @@ class Engine:
                 profile = profile_for(fmt, fields)
                 fp = fingerprint(fmt if profile["id"] == "generic/1" else fmt + ":" + profile["id"] + ":" + profile["event_class"], fields)
                 proposed = suggest(fields) if profile["id"] == "generic/1" else profile["mapping"]
+                ai_evidence = []
+                # Reviewed vendor semantics and existing aliases take precedence.
+                if self.use_model and profile["id"] == "generic/1":
+                    additions, ai_evidence = propose(fields, proposed, convert)
+                    proposed = {**proposed, **additions}
+                result["ai_suggestions"] = ai_evidence
                 result.update(format=fmt, fields=fields, fingerprint=fp, suggested_mapping=proposed, profile=profile, event_class=profile["event_class"], warnings=profile["warnings"])
                 contract = self.db.execute("SELECT * FROM contracts WHERE source=? AND fingerprint=? AND active=1 ORDER BY version DESC LIMIT 1", (row["source"], fp)).fetchone()
                 mapping = json.loads(contract["mapping"]) if contract else proposed

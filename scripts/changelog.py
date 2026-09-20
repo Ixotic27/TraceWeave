@@ -15,8 +15,8 @@ LOG = ROOT / "docs" / "CHANGELOG.md"
 
 
 def snapshot():
-    paths = [ROOT / "README.md", ROOT / "run.ps1", ROOT / "Dockerfile"]
-    for folder, suffixes in (("traceweave", {".py"}), ("web", {".html", ".js", ".css"}), ("scripts", {".py"}), ("tests", {".py"}), ("docs", {".md"})):
+    paths = [ROOT / "README.md", ROOT / "run.ps1", ROOT / "Dockerfile", ROOT / "requirements-gpu.txt", ROOT / "requirements-gpu-lock.txt"]
+    for folder, suffixes in (("traceweave", {".py"}), ("web", {".html", ".js", ".css"}), ("scripts", {".py", ".ps1"}), ("tests", {".py"}), ("docs", {".md"}), ("models", {".json"}), ("datasets/model", {".json"}), ("supabase", {".sql", ".toml"})):
         paths.extend(p for p in (ROOT / folder).rglob("*") if p.suffix in suffixes and p != LOG)
     return {str(p.relative_to(ROOT)).replace("\\", "/"): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(set(paths)) if p.is_file()}
 
