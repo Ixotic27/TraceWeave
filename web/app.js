@@ -1,206 +1,289 @@
-let state = {events: [], counts: {}, contracts: [], audit: []};
-let filter = 'all';
-let selected = null;
-const $ = (selector) => document.querySelector(selector);
-const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const labels = {normalized:'Normalized', drift:'Schema drift', needs_mapping:'New source', quarantined:'Quarantined'};
-
+'use strict';
+const $ = selector => document.querySelector(selector);
+const $$ = selector => [...document.querySelectorAll(selector)];
+const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const labels = {normalized:'Ready to export', needs_mapping:'Needs review', drift:'Format changed', quarantined:'Couldn’t process'};
+const fieldNames = {src_ip:'Source IP', dst_ip:'Destination IP', action:'Action', src_port:'Source port', dst_port:'Destination port', protocol:'Protocol', timestamp:'Time'};
+const fieldHelp = {src_ip:'Where traffic came from', dst_ip:'Where traffic was going', action:'Whether the device allowed or denied traffic', src_port:'Port used by the sender', dst_port:'Port on the receiving device', protocol:'TCP, UDP, ICMP, or ICMPv6', timestamp:'Date and time, including timezone'};
+const required = ['src_ip','dst_ip','action'];
+let state = {events:[], counts:{}, contracts:[], audit:[], targets:[]};
+let connected = false, loaded = false, refreshing = null, signature = '', filter = 'all', page = 1, selected = null, inputMethod = 'file', chosenFile = null;
+let importing = false;
+const pageSize = 25;
+const number = value => Number(value || 0).toLocaleString();
+const countText = (value, noun = 'log') => `${number(value)} ${noun}${value === 1 ? '' : 's'}`;
+const isReview = row => ['needs_mapping','drift'].includes(row.status);
+const sizeText = bytes => bytes < 1000 ? `${number(bytes)} bytes` : bytes < 1000000 ? `${(bytes / 1000).toFixed(1)} KB` : `${(bytes / 1000000).toFixed(1)} MB`;
 function notify(message, error = false) {
   $('#notice').textContent = message;
   $('#notice').className = error ? 'notice error' : 'notice';
   $('#notice').hidden = false;
 }
-let isStaticMode = false;
-let mockState = null;
-
-function initStaticEngine() {
-  isStaticMode = true;
-  const ind = $('#live-indicator');
-  const mode = $('#status-mode');
-  const desc = $('#status-desc');
-  if (ind) ind.style.background = '#0ea5e9';
-  if (mode) mode.textContent = 'Interactive Web Demo';
-  if (desc) desc.innerHTML = 'Client simulation active.<br>Full interactive pipeline ready.';
-  if (!mockState && window.TRACEWEAVE_DEMO) {
-    mockState = JSON.parse(JSON.stringify(window.TRACEWEAVE_DEMO.samples));
-  }
+function setConnection(ok) {
+  connected = ok;
+  $('#connection-text').textContent = ok ? 'Connected locally' : 'Server unavailable';
+  $('#connection-status').classList.toggle('offline', !ok);
+  $('#connection-banner').hidden = ok;
+  $('#connection-message').textContent = loaded
+    ? 'The server stopped responding. The logs below are from the last successful update. Start run.ps1 in the project folder to reconnect.'
+    : 'Start run.ps1 in the project folder, then open http://127.0.0.1:8765/. This page needs the local server to read and process your logs.';
+  $$('[data-import]').forEach(button => button.disabled = !ok);
+  $('#verify').disabled = !ok || !state.events.length;
+  $('#export').disabled = !ok || !state.counts.normalized;
+  $('#import-submit').disabled = !ok || importing;
+  if ($('#approve')) $('#approve').disabled = !ok;
+  if ($('#rollback')) $('#rollback').disabled = !ok;
 }
-
+async function request(path, payload) {
+  let response;
+  try {
+    response = await fetch(path, {
+      ...(payload === undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}),
+      cache:'no-store', signal:AbortSignal.timeout(15000)
+    });
+  } catch {
+    setConnection(false);
+    throw new Error('Cannot reach the local server. Start run.ps1, then try again.');
+  }
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    if (response.status === 404 || response.status >= 500) setConnection(false);
+    throw new Error(error.error || 'The server could not complete this request.');
+  }
+  return response;
+}
 async function api(path, payload) {
-  if (!isStaticMode) {
-    try {
-      const response = await fetch(path, payload ? {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)} : {});
-      if (response.ok) {
-        return await response.json();
-      }
-      if (response.status !== 404 && response.status !== 405) {
-        const result = await response.json().catch(() => ({}));
-        throw new Error(result.error || 'Request failed');
-      }
-      if (window.TRACEWEAVE_DEMO) {
-        initStaticEngine();
-      }
-    } catch (err) {
-      if (window.TRACEWEAVE_DEMO) {
-        initStaticEngine();
-      } else {
-        throw err;
-      }
-    }
+  const response = await request(path, payload);
+  if (!(response.headers.get('Content-Type') || '').includes('application/json')) {
+    setConnection(false);
+    throw new Error('This page is not connected to the log server. Open your local workspace.');
   }
-
-  if (isStaticMode || window.TRACEWEAVE_DEMO) {
-    initStaticEngine();
-    const demo = window.TRACEWEAVE_DEMO;
-    if (path === '/api/state') {
-      return mockState || demo.samples;
-    }
-    if (path === '/api/demo') {
-      const mode = payload.mode;
-      if (mode === 'samples') {
-        mockState = JSON.parse(JSON.stringify(demo.samples));
-        return { ingested: 8 };
-      }
-      if (mode === 'drift') {
-        mockState = JSON.parse(JSON.stringify(demo.drift));
-        return { ingested: 2 };
-      }
-      if (mode === 'adversarial') {
-        mockState = JSON.parse(JSON.stringify(demo.adversarial));
-        return { ingested: 4 };
-      }
-    }
-    if (path === '/api/approve') {
-      mockState = JSON.parse(JSON.stringify(demo.drift_approved));
-      return { version: 2, replayed: 2, normalized: 10 };
-    }
-    if (path === '/api/rollback') {
-      mockState = JSON.parse(JSON.stringify(demo.drift));
-      return { version: 1, replayed: 2 };
-    }
-    if (path === '/api/verify') {
-      const count = mockState ? mockState.events.length : 8;
-      return { verified: count, records: count, failed: [] };
-    }
-    if (path.startsWith('/api/history')) {
-      const row = selected || (mockState ? mockState.events[0] : null);
-      return [{
-        revision: row ? row.revision : 1,
-        status: row ? row.status : 'normalized',
-        contract_version: row ? row.contract_version : 1,
-        canonical: row ? row.canonical : {},
-        errors: row ? row.errors : []
-      }];
-    }
-    if (path === '/api/benchmark') {
-      return demo.benchmark;
-    }
-    if (path === '/api/ingest') {
-      return { ingested: 1 };
-    }
-  }
-  throw new Error('Endpoint not available');
+  return response.json();
 }
 async function refresh() {
-  state = await api('/api/state');
-  $('#total').textContent = state.events.length;
-  $('#nav-count').textContent = state.events.length;
-  $('#event-count').textContent = `${state.events.length} events`;
-  $('#normalized').textContent = state.counts.normalized;
-  $('#review').textContent = state.counts.needs_mapping + state.counts.drift;
-  $('#quarantined').textContent = state.counts.quarantined;
-  $('#bytes').textContent = `${state.raw_bytes.toLocaleString()} bytes of original evidence`;
-  renderEvents(); renderContracts(); renderAudit();
+  if (refreshing) return refreshing;
+  refreshing = (async () => {
+    const next = await api('/api/state');
+    if (!Array.isArray(next.events) || !next.counts) throw new Error('Unexpected workspace response.');
+    state = next; loaded = true;
+    const nextSignature = JSON.stringify([next.events.map(row => [row.id,row.revision]), next.contracts, next.audit]);
+    if (nextSignature !== signature) {
+      signature = nextSignature;
+      renderWorkspace();
+    }
+    setConnection(true);
+    $('#last-updated').textContent = `Updated ${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'})} · refreshes every 10s`;
+  })();
+  try { await refreshing; } catch (error) { setConnection(false); throw error; } finally { refreshing = null; }
+}
+function renderWorkspace() {
+  const review = state.counts.needs_mapping + state.counts.drift;
+  $('#total').textContent = number(state.events.length);
+  $('#nav-count').textContent = number(state.events.length);
+  $('#event-count').textContent = number(state.events.length);
+  $('#normalized').textContent = number(state.counts.normalized);
+  $('#review').textContent = number(review);
+  $('#quarantined').textContent = number(state.counts.quarantined);
+  $('#bytes').textContent = `${sizeText(state.raw_bytes)} of originals saved`;
+  $('#getting-started').hidden = state.events.length > 0;
+  $('#review-banner').hidden = !review;
+  $('#review-summary').textContent = `${countText(review)} ${review === 1 ? 'needs' : 'need'} a quick review`;
+  $('#list-caption').textContent = state.events.length ? 'Newest first. Open a log to see its details or review its fields.' : 'Only the logs you add appear here.';
+  const sources = [...new Set(state.events.map(row => row.source))].sort();
+  const source = $('#source-filter').value;
+  $('#source-filter').innerHTML = '<option value="">All sources</option>' + sources.map(name => `<option value="${esc(name)}">${esc(name)}</option>`).join('');
+  $('#source-filter').value = sources.includes(source) ? source : '';
+  $('#known-sources').innerHTML = sources.map(name => `<option value="${esc(name)}"></option>`).join('');
+  renderEvents(); renderSources(); renderActivity();
 }
 function renderEvents() {
-  const query = $('#search').value.toLowerCase();
-  const rows = state.events.filter(row => (filter === 'all' || (filter === 'review' ? ['drift','needs_mapping'].includes(row.status) : row.status === filter)) && JSON.stringify(row).toLowerCase().includes(query));
-  $('#events-body').innerHTML = rows.map(row => `<tr data-event="${row.id}"><td><button class="event-button" data-inspect="${row.id}" aria-label="Inspect event ${row.id} from ${escapeHtml(row.source)}"><strong>${escapeHtml(row.source)}</strong><small>EVT-${String(row.id).padStart(4,'0')} · revision ${row.revision}</small></button></td><td><span class="format-pill">${escapeHtml(row.format)}</span></td><td class="connection">${escapeHtml(row.canonical.src_ip || 'unresolved')}<span>→</span>${escapeHtml(row.canonical.dst_ip || 'unresolved')}</td><td><span class="action-pill action-${row.canonical.action === 'allow' ? 'allow' : 'deny'}">${escapeHtml(row.canonical.action || '—')}</span></td><td><span class="status ${row.status}">${labels[row.status]}</span></td><td class="evidence-link">${row.raw_sha256.slice(0,9)}… ↗</td></tr>`).join('');
-  $('#empty').hidden = rows.length > 0;
-  if (!rows.length && state.events.length) $('#empty').innerHTML = '<h3>No matching events.</h3><p>Change the search or status filter to see more records.</p>';
-  $('#footer-count').textContent = `${rows.length} of ${state.events.length} events`;
+  const query = $('#search').value.trim().toLowerCase();
+  const source = $('#source-filter').value;
+  const rows = state.events.filter(row => (filter === 'all' || (filter === 'review' ? isReview(row) : row.status === filter)) && (!source || row.source === source) && (!query || `${row.source} ${row.raw_text} ${JSON.stringify(row.canonical)}`.toLowerCase().includes(query))).reverse();
+  const pages = Math.max(1, Math.ceil(rows.length / pageSize));
+  page = Math.min(page, pages);
+  const visible = rows.slice((page - 1) * pageSize, page * pageSize);
+  $('#events-body').innerHTML = visible.map(row => `<tr><td><button class="event-button" data-inspect="${row.id}"><strong>${esc(row.source)}</strong><small>Log #${row.id}</small></button></td><td class="connection-cell"><span>${esc(row.canonical.src_ip || 'Not identified')}</span><span class="connection-arrow">→</span><span>${esc(row.canonical.dst_ip || 'Not identified')}</span>${row.status !== 'normalized' && Object.keys(row.canonical).length ? '<small>Suggested · not yet validated</small>' : ''}</td><td>${row.canonical.action ? `<span class="action-label ${row.canonical.action === 'allow' ? 'allow' : 'deny'}">${row.canonical.action === 'allow' ? 'Allow' : 'Deny'}</span>` : '<span class="muted">—</span>'}</td><td><span class="format-label">${esc(row.format)}</span></td><td><span class="status ${row.status}">${labels[row.status]}</span></td><td><button class="icon-button" data-inspect="${row.id}" aria-label="Open log ${row.id}">→</button></td></tr>`).join('');
+  $('#table-wrap').hidden = !rows.length;
+  $('#empty').hidden = !!rows.length;
+  const hasData = state.events.length > 0;
+  $('#empty-title').textContent = hasData ? 'No logs match these filters' : 'Start with your first log file';
+  $('#empty-description').textContent = hasData ? 'Try a different search, source, or status to find your logs.' : 'Add logs from a firewall, gateway, or other network device. We’ll keep the originals and help you review the important fields.';
+  $('#empty-action').textContent = hasData ? 'Clear filters' : '＋ Add your first logs';
+  $('#empty-action').toggleAttribute('data-import', !hasData);
+  $('#empty-action').disabled = !connected && !hasData;
+  $('#empty-formats').hidden = hasData;
+  $('#footer-count').textContent = rows.length ? `Showing ${number((page - 1) * pageSize + 1)}–${number(Math.min(page * pageSize, rows.length))} of ${countText(rows.length)}` : hasData ? `0 of ${countText(state.events.length)}` : 'No logs added yet';
+  $('#page-number').textContent = `Page ${page} of ${pages}`;
+  $('#previous-page').disabled = page <= 1;
+  $('#next-page').disabled = page >= pages;
 }
-function renderContracts() {
-  $('#contract-list').innerHTML = state.contracts.length ? state.contracts.map(c => `<article class="card"><h3>${escapeHtml(c.source)} <span class="status ${c.active ? 'normalized' : ''}">${c.active ? 'Active' : 'Historical'} · v${c.version}</span></h3><p>Structure fingerprint: <code>${c.fingerprint}</code></p><pre>${escapeHtml(JSON.stringify(JSON.parse(c.mapping),null,2))}</pre></article>`).join('') : '<article class="card"><p>Load a demonstration or import logs to create your first source contract.</p></article>';
+function renderSources() {
+  const sources = [...new Set(state.events.map(row => row.source))].sort();
+  $('#source-list').innerHTML = sources.length ? sources.map(source => {
+    const rows = state.events.filter(row => row.source === source);
+    const ready = rows.filter(row => row.status === 'normalized').length;
+    const review = rows.filter(isReview).length;
+    const rules = state.contracts.filter(rule => rule.source === source && rule.active);
+    return `<article class="source-card"><div class="source-card-heading"><span class="source-icon" aria-hidden="true">▦</span><h2>${esc(source)}</h2></div><p>${[...new Set(rows.map(row => row.format))].map(esc).join(' · ')}</p><div class="source-stats"><div><strong>${number(rows.length)}</strong><span>Logs added</span></div><div><strong>${number(ready)}</strong><span>Ready to export</span></div><div><strong>${number(review)}</strong><span>Need review</span></div></div><div class="source-card-footer"><span>${rules.length ? `${countText(rules.length, 'format')} reviewed` : 'Field review needed'}</span><button class="button" data-source="${esc(source)}">View logs →</button></div>${rules.length ? `<details><summary>Saved field settings</summary>${rules.map(rule => `<div class="saved-rule"><strong>Settings version ${rule.version}</strong><dl>${Object.entries(JSON.parse(rule.mapping)).map(([key,target]) => `<div><dt>${esc(fieldNames[target])}</dt><dd>${esc(key)}</dd></div>`).join('')}</dl></div>`).join('')}</details>` : ''}</article>`;
+  }).join('') : '<div class="plain-empty"><span aria-hidden="true">▦</span><h2>No sources yet</h2><p>Add your first logs and give the device a name. It will appear here automatically.</p><button class="button primary" data-import>＋ Add logs</button></div>';
 }
-function renderAudit() {
-  $('#audit-list').innerHTML = state.audit.length ? state.audit.map(a => `<article class="card"><h3>${escapeHtml(a.action.replaceAll('_',' '))}</h3><p>${escapeHtml(a.at)}</p><pre>${escapeHtml(JSON.stringify(JSON.parse(a.details),null,2))}</pre></article>`).join('') : '<article class="card"><p>Mapping decisions will appear here.</p></article>';
+function renderActivity() {
+  $('#activity-list').innerHTML = state.audit.length ? state.audit.map(item => {
+    const detail = JSON.parse(item.details);
+    const title = item.action === 'mapping_approved' ? 'Field settings saved' : item.action === 'mapping_rollback' ? 'Earlier field settings restored' : item.action.replaceAll('_', ' ');
+    return `<article class="activity-item"><span class="activity-icon" aria-hidden="true">${item.action === 'mapping_rollback' ? '↶' : '✓'}</span><div><h2>${esc(title)}</h2><p>${esc(detail.source || '')} · Settings version ${esc(detail.version || '—')}</p>${detail.validation ? `<small>${countText(detail.validation.length)} checked · ${number(detail.validation.filter(check => check.valid).length)} passed validation</small>` : ''}</div><time datetime="${esc(item.at)}">${esc(new Date(item.at).toLocaleString())}</time></article>`;
+  }).join('') + '<p class="muted">Showing the latest 30 decisions at most.</p>' : '<div class="plain-empty"><span aria-hidden="true">◷</span><h2>Your decisions will appear here</h2><p>When you save field settings or restore a previous version, we’ll record it here.</p></div>';
+}
+function changeView(view) {
+  $$('.view').forEach(element => element.hidden = element.id !== `${view}-view`);
+  $$('.nav').forEach(button => {
+    button.classList.toggle('active', button.dataset.view === view);
+    if (button.dataset.view === view) button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current');
+  });
+  $('#view-label').textContent = {logs:'Logs', sources:'Sources', activity:'Activity', help:'How it works'}[view];
+}
+function setFilter(value) {
+  filter = value; page = 1;
+  $$('[data-filter]').forEach(button => { button.classList.toggle('selected', button.dataset.filter === value); button.setAttribute('aria-pressed', String(button.dataset.filter === value)); });
+  renderEvents();
+}
+function friendlyError(text) {
+  if (text.startsWith('Required field unavailable: ')) return `Choose a field for ${fieldNames[text.split(': ')[1]] || text.split(': ')[1]}.`;
+  if (text.includes('Duplicate field:')) return 'This log repeats a field name. We saved the original, but cannot safely decide which value to use.';
+  if (text.includes('port outside')) return 'A port number is outside the valid range (0–65535).';
+  if (text.includes('action: unknown vocabulary')) return 'The device action is not recognized. This value needs a source-specific rule.';
+  if (text.includes('timestamp: timezone')) return 'The time has no timezone. Use a time field that includes one, or leave this optional field unassigned.';
+  if (text.includes('Unsupported structure')) return 'This log format is not supported yet. Its original content is saved and available to download.';
+  return text;
 }
 function inspect(id) {
-  const row = state.events.find(r => r.id === id);
+  const row = state.events.find(item => item.id === id);
   if (!row) return;
   selected = row;
-  $('#detail-source').textContent = `${row.source} / ${row.format}`;
-  $('#detail-title').textContent = `Event ${String(id).padStart(4,'0')} · ${labels[row.status]}`;
-  const active = state.contracts.find(c => c.source === row.source && c.fingerprint === row.fingerprint && c.active);
+  const required = row.profile?.required || ['src_ip','dst_ip','action'];
+  const active = state.contracts.find(rule => rule.source === row.source && rule.fingerprint === row.fingerprint && rule.active);
   const mapping = active ? JSON.parse(active.mapping) : row.suggested_mapping;
-  const errors = row.errors.length ? `<div class="detail-errors">${row.errors.map(escapeHtml).join('<br>')}</div>` : '';
-  $('#detail-content').innerHTML = `${errors}<h3>Original record</h3><pre>${escapeHtml(row.raw_text)}</pre><div class="raw-hash">SHA-256 · ${row.raw_sha256}</div><div class="detail-actions"><button class="button" id="download-raw">↓ Download original bytes</button><button class="button" id="show-history">◷ View ${row.revision} revision${row.revision === 1 ? '' : 's'}</button></div><h3>${row.status === 'normalized' ? 'Normalized fields' : 'Candidate fields · withheld from export'}</h3><pre>${escapeHtml(JSON.stringify(row.canonical,null,2))}</pre><h3>Field lineage</h3>${Object.entries(row.lineage).map(([target,l]) => `<div class="lineage-item"><strong>${escapeHtml(target)}</strong> ← <code>${escapeHtml(l.selector)}</code> · original <code>${escapeHtml(JSON.stringify(l.original_value))}</code><br><code>${escapeHtml(l.transform)} · contract ${l.contract_version ?? 'unapproved'}</code></div>`).join('') || '<p>No interpreted fields. The raw bytes remain available.</p>'}${Object.keys(row.fields).length ? `<h3>Review field mapping</h3><p class="review-help">Confirm field meaning using the device specification. A valid IP address alone does not establish traffic direction. ${Object.hasOwn(row.fields,'origin') ? 'In this synthetic demo, the firmware renamed src to origin. Map origin to src_ip to repair the affected events.' : ''}</p><div id="mapping-fields">${Object.entries(row.fields).map(([key,value],index) => `<div class="mapping-row"><code>${escapeHtml(key)}<small>${escapeHtml(JSON.stringify(value))}</small></code><select data-field-index="${index}" aria-label="Map ${escapeHtml(key)}"><option value="">Keep as unmapped</option>${state.targets.map(t => `<option value="${t}" ${mapping[key] === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>`).join('')}</div><p>Required for this demo contract: src_ip, dst_ip, action. Invalid records remain quarantined after replay.</p><div class="detail-actions"><button class="button dark" id="approve">Approve mapping and replay</button>${active && state.contracts.filter(c => c.source === row.source && c.fingerprint === row.fingerprint && c.version < active.version).length ? '<button class="button" id="rollback">Roll back mapping</button>' : ''}</div>` : ''}<h3>Unmapped attributes</h3><pre>${escapeHtml(JSON.stringify(row.unmapped,null,2))}</pre><div id="history-panel"></div>`;
+  const keys = Object.keys(row.fields);
+  const matching = state.events.filter(item => item.source === row.source && item.fingerprint === row.fingerprint).length;
+  const explanations = {normalized:'These fields passed validation and are included in your export.',needs_mapping:'Check the suggested field names below. Saving applies your choices to matching logs from this source.',drift:'This source is sending a different set of fields. Review the new structure before exporting.',quarantined:'This log could not pass processing. The original is saved. Check the reason below.'};
+  const errors = row.errors.filter(error => !['Review source mapping before export','Structure changed; review mapping before export'].includes(error));
+  $('#detail-source').textContent = `${row.source} · ${row.format}`;
+  $('#detail-title').textContent = `Log #${row.id}`;
+  $('#detail-content').innerHTML = `<div class="detail-summary"><span class="status ${row.status}">${labels[row.status]}</span><p>${explanations[row.status]}</p></div><div id="detail-error" class="form-error" role="alert" hidden></div>${errors.length ? `<div class="validation-note"><strong>What needs attention</strong><ul>${errors.map(error => `<li>${esc(friendlyError(error))}</li>`).join('')}</ul></div>` : ''}
+    <h3>${row.status === 'normalized' ? 'Reviewed fields' : 'Suggested fields'}</h3><dl class="field-values">${Object.entries(fieldNames).map(([target,label]) => `<div><dt>${label}</dt><dd>${esc(row.canonical[target] ?? 'Not identified')}</dd></div>`).join('')}</dl>
+    ${keys.length ? `<details class="mapping-section" ${row.status !== 'normalized' ? 'open' : ''}><summary>${row.status === 'normalized' ? 'Edit field settings' : 'Review field settings'}</summary><p>Match each meaning on the left to a field in your log. Check your device’s documentation if you’re unsure. Required fields must be assigned.</p><div id="mapping-fields">${Object.entries(fieldNames).map(([target,label]) => `<div class="mapping-row"><label for="map-${target}">${label} ${required.includes(target) ? '<span class="required-label">Required</span>' : '<span class="optional-label">Optional</span>'}<small>${fieldHelp[target]}</small></label><select id="map-${target}" data-target="${target}"><option value="">${required.includes(target) ? 'Choose a field…' : 'Leave unassigned'}</option>${keys.map((key,index) => `<option value="${index}" ${mapping[key] === target ? 'selected' : ''}>${esc(key)} — ${esc(String(row.fields[key]).slice(0,80))}</option>`).join('')}</select></div>`).join('')}</div><div class="mapping-footer"><p>Applies to ${countText(matching)} with this structure from <strong>${esc(row.source)}</strong>, plus future matches. Invalid values remain excluded from export.</p><div class="detail-actions"><button class="button primary" id="approve" ${!connected ? 'disabled' : ''}>Save settings & process logs</button>${active && state.contracts.some(rule => rule.source === row.source && rule.fingerprint === row.fingerprint && rule.version < active.version) ? `<button class="button" id="rollback" ${!connected ? 'disabled' : ''}>Restore previous settings</button>` : ''}</div></div></details>` : ''}
+    <details class="detail-section"><summary>Original log</summary><p>Exactly what was received. Download preserves the original bytes, including line endings.</p><pre>${esc(row.raw_text)}</pre><button class="button" id="download-raw">↓ Download original</button></details>
+    <details class="detail-section"><summary>Technical details & field history</summary><p>Each reviewed value can be traced to its original field.</p>${Object.entries(row.lineage).map(([target,line]) => `<div class="lineage-item"><strong>${esc(fieldNames[target])}</strong><span>From <code>${esc(line.selector)}</code> · original value <code>${esc(JSON.stringify(line.original_value))}</code></span></div>`).join('')}<h3>Original content checksum (SHA-256)</h3><code class="raw-hash">${esc(row.raw_sha256)}</code><p>Checks local byte consistency; it does not verify the sending device.</p><h3>Output schema</h3><code>${esc(row.schema)}</code><h3>Additional fields kept from your log</h3><pre>${esc(JSON.stringify(row.unmapped,null,2))}</pre><button class="button" id="show-history">View processing history (${row.revision})</button><div id="history-panel"></div></details>`;
   if (!$('#detail-dialog').open) $('#detail-dialog').showModal();
 }
-function download(bytes, name) {
-  const url = URL.createObjectURL(new Blob([bytes], {type:'application/octet-stream'}));
-  const a = document.createElement('a'); a.href=url; a.download=name; a.click();
+function download(data, name) {
+  const url = URL.createObjectURL(data instanceof Blob ? data : new Blob([data], {type:'application/octet-stream'}));
+  const link = document.createElement('a'); link.href = url; link.download = name; link.click();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
+function showImport() {
+  $('#import-error').hidden = true;
+  $('#import-dialog').showModal();
+  $('#source-name').focus();
+}
+function setInputMethod(method) {
+  inputMethod = method;
+  $('#file-input-panel').hidden = method !== 'file';
+  $('#text-input-panel').hidden = method !== 'text';
+  $$('[data-input]').forEach(button => { button.classList.toggle('selected',button.dataset.input === method); button.setAttribute('aria-pressed',String(button.dataset.input === method)); });
+}
+function selectFile(file) {
+  chosenFile = file || null;
+  $('#file-title').textContent = file ? file.name : 'Choose a log file or drop it here';
+  $('#file-description').textContent = file ? `${sizeText(file.size)} · click to choose a different file` : 'LOG, TXT, JSON, NDJSON, JSONL, XML, CSV · up to 2 MB';
+  $('#drop-zone').classList.toggle('has-file', !!file);
+}
 document.addEventListener('click', async event => {
-  const target = event.target.closest('button, [data-event], a[href*="/api/export"]');
-  if (!target) return;
-  if (target.matches('a[href*="/api/export"]') && isStaticMode) {
-    event.preventDefault();
-    const rows = (state.events || []).filter(r => r.status === 'normalized');
-    const ndjson = rows.map(r => JSON.stringify(r)).join('\n') + (rows.length ? '\n' : '');
-    download(new TextEncoder().encode(ndjson), 'traceweave-normalized.ndjson');
-    return;
+  const button = event.target.closest('button');
+  if (!button || button.disabled) return;
+  const busyIds = ['approve','rollback','verify','export','refresh','retry'];
+  const busy = busyIds.includes(button.id);
+  if (busy) button.disabled = true;
+  try {
+    if (button.classList.contains('close-dialog')) { button.closest('dialog').close(); return; }
+    if (button.dataset.view) { changeView(button.dataset.view); return; }
+    if (button.hasAttribute('data-import')) { showImport(); return; }
+    if (button.dataset.input) { setInputMethod(button.dataset.input); return; }
+    if (button.dataset.filter) { setFilter(button.dataset.filter); return; }
+    if (button.dataset.inspect) { inspect(Number(button.dataset.inspect)); return; }
+    if (button.dataset.source) { changeView('logs'); $('#source-filter').value = button.dataset.source; $('#search').value = ''; setFilter('all'); return; }
+    if (button.id === 'empty-action') { $('#search').value = ''; $('#source-filter').value = ''; setFilter('all'); }
+    if (button.id === 'previous-page') { page--; renderEvents(); }
+    if (button.id === 'next-page') { page++; renderEvents(); }
+    if (button.id === 'review-next') inspect(state.events.find(isReview).id);
+    if (['refresh','retry'].includes(button.id)) { await refresh(); $('#notice').hidden = true; }
+    if (button.id === 'verify') { const result = await api('/api/verify'); notify(result.failed.length ? `${countText(result.failed.length)} failed the original-content check. Affected IDs: ${result.failed.join(', ')}.` : `All ${countText(result.verified)} match their saved original bytes.`, !!result.failed.length); }
+    if (button.id === 'export') { const response = await request('/api/export'); download(await response.blob(),'traceweave-logs.ndjson'); notify('Your reviewed logs have been exported as NDJSON.'); }
+    if (button.id === 'download-raw') download(Uint8Array.from(atob(selected.raw_base64), char => char.charCodeAt(0)), `log-${selected.id}-original.log`);
+    if (button.id === 'show-history') { const rows = await api(`/api/history?id=${selected.id}`); $('#history-panel').innerHTML = rows.map(row => `<div class="history-item"><strong>Revision ${row.revision} · ${labels[row.status]}</strong><p>${row.contract_version ? `Field settings version ${row.contract_version}` : 'No approved field settings'}</p><pre>${esc(JSON.stringify(row.canonical,null,2))}</pre></div>`).join(''); }
+    if (button.id === 'approve') {
+      const required = selected.profile?.required || ['src_ip','dst_ip','action'];
+      const mapping = {}, keys = Object.keys(selected.fields);
+      for (const select of $$('[data-target]')) {
+        if (select.value === '') { if (required.includes(select.dataset.target)) throw new Error(`Choose a field for ${fieldNames[select.dataset.target]}.`); continue; }
+        const key = keys[Number(select.value)];
+        if (Object.hasOwn(mapping,key)) throw new Error('Each source field can be used once. Choose a different field for each meaning.');
+        mapping[key] = select.dataset.target;
+      }
+      const result = await api('/api/approve', {source:selected.source,fingerprint:selected.fingerprint,mapping});
+      await refresh(); inspect(selected.id);
+      notify(`Field settings saved. ${countText(result.normalized)} ready to export out of ${countText(result.replayed)} processed.`);
+    }
+    if (button.id === 'rollback') { const result = await api('/api/rollback',{source:selected.source,fingerprint:selected.fingerprint}); await refresh(); inspect(selected.id); notify(`Restored settings version ${result.version} and processed ${countText(result.replayed)} again.`); }
+  } catch (error) {
+    if ($('#detail-dialog').open) { $('#detail-error').textContent = error.message; $('#detail-error').hidden = false; $('#detail-error').scrollIntoView({block:'nearest'}); }
+    else notify(error.message,true);
+  } finally {
+    if (busy) button.disabled = !connected && !['retry','refresh'].includes(button.id);
+    if (busy) { $('#verify').disabled = !connected || !state.events.length; $('#export').disabled = !connected || !state.counts.normalized; }
   }
-  try {
-    if (target.classList.contains('close-dialog')) { target.closest('dialog').close(); return; }
-    if (target.dataset.view) {
-      document.querySelectorAll('.view').forEach(v => v.hidden = v.id !== `${target.dataset.view}-view`);
-      document.querySelectorAll('.nav').forEach(n => n.classList.toggle('active', n === target));
-      $('#view-label').textContent = {pipeline:'Event pipeline',contracts:'Source contracts',audit:'Decision history',benchmark:'Evaluation'}[target.dataset.view];
-      if (target.dataset.view === 'benchmark') $('#benchmark-data').textContent = JSON.stringify(await api('/api/benchmark'),null,2);
-      return;
-    }
-    if (target.dataset.filter) { filter=target.dataset.filter; document.querySelectorAll('[data-filter]').forEach(b => b.classList.toggle('selected',b === target)); renderEvents(); return; }
-    if (target.dataset.inspect || target.dataset.event) { inspect(Number(target.dataset.inspect || target.dataset.event)); return; }
-    if (target.id === 'import-open') { $('#import-dialog').showModal(); return; }
-    if (target.dataset.demo) {
-      target.disabled=true;
-      const result = await api('/api/demo',{mode:target.dataset.demo}); await refresh();
-      notify(`${result.ingested} synthetic events retained. ${target.dataset.demo === 'drift' ? 'Open a Schema drift event to review origin → src_ip and replay.' : target.dataset.demo === 'adversarial' ? 'Invalid records are retained and excluded from validated export.' : 'Known synthetic mappings were reviewed in the fixture setup. Uploaded logs always require review.'}`);
-    }
-    if (target.id === 'refresh') await refresh();
-    if (target.id === 'verify') { const r=await api('/api/verify'); notify(`${r.verified}/${r.records} records match their original SHA-256. ${r.failed.length ? 'Failed event IDs: '+r.failed.join(', ') : 'No byte-integrity mismatches detected.'} This verifies local bytes, not source authenticity.`,r.failed.length > 0); }
-    if (target.id === 'download-raw') download(Uint8Array.from(atob(selected.raw_base64),c=>c.charCodeAt(0)),`event-${selected.id}-original.log`);
-    if (target.id === 'show-history') { const rows=await api(`/api/history?id=${selected.id}`); $('#history-panel').innerHTML=`<h3>Immutable-by-application result history</h3><pre>${escapeHtml(JSON.stringify(rows.map(r=>({revision:r.revision,status:r.status,contract:r.contract_version,canonical:r.canonical,errors:r.errors})),null,2))}</pre>`; }
-    if (target.id === 'approve') {
-      const mapping={}; const keys=Object.keys(selected.fields);
-      document.querySelectorAll('[data-field-index]').forEach(el=>{ if(el.value) mapping[keys[Number(el.dataset.fieldIndex)]]=el.value; });
-      const r=await api('/api/approve',{source:selected.source,fingerprint:selected.fingerprint,mapping});
-      await refresh(); $('#detail-dialog').close(); notify(`Contract v${r.version} approved. Replayed ${r.replayed} original records; ${r.normalized} validated for export.`);
-    }
-    if (target.id === 'rollback') { const r=await api('/api/rollback',{source:selected.source,fingerprint:selected.fingerprint}); await refresh(); $('#detail-dialog').close(); notify(`Rolled back to contract v${r.version}. Replayed ${r.replayed} records.`); }
-  } catch(error) {
-    if ($('#detail-dialog').open) {
-      const errorBox=document.createElement('div'); errorBox.className='detail-errors'; errorBox.textContent=error.message; $('#detail-content').prepend(errorBox); $('#detail-dialog').scrollTop=0;
-    } else notify(error.message,true);
-  } finally { target.disabled=false; }
 });
-$('#search').addEventListener('input',renderEvents);
-$('#import-form').addEventListener('submit',async event=>{
-  event.preventDefault(); const button=event.submitter; button.disabled=true;
+$('#search').addEventListener('input', () => { page = 1; renderEvents(); });
+$('#source-filter').addEventListener('change', () => { page = 1; renderEvents(); });
+$('#log-file').addEventListener('change', () => selectFile($('#log-file').files[0]));
+for (const name of ['dragenter','dragover']) $('#drop-zone').addEventListener(name, event => { event.preventDefault(); $('#drop-zone').classList.add('dragging'); });
+$('#drop-zone').addEventListener('dragleave', () => $('#drop-zone').classList.remove('dragging'));
+$('#drop-zone').addEventListener('drop', event => { event.preventDefault(); $('#drop-zone').classList.remove('dragging'); if (event.dataTransfer.files.length > 1) { $('#import-error').textContent = 'Please add one file at a time.'; $('#import-error').hidden = false; return; } selectFile(event.dataTransfer.files[0]); });
+$('#import-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (importing) return;
+  importing = true;
+  const button = $('#import-submit'); button.disabled = true; button.textContent = 'Processing…';
+  $('#import-error').hidden = true;
+  let added = null;
   try {
-    const data={source:$('#source-name').value,single_record:$('#single-record').checked};
-    const file=$('#log-file').files[0];
-    if (file) {
-      if (file.size > 2000000) throw new Error('File exceeds 2 MB');
-      const bytes=new Uint8Array(await file.arrayBuffer()); let binary='';
-      for(let i=0;i<bytes.length;i+=8192) binary+=String.fromCharCode(...bytes.subarray(i,i+8192));
-      data.base64=btoa(binary);
-    } else data.text=$('#log-input').value;
-    const result=await api('/api/ingest',data); await refresh(); $('#import-dialog').close(); notify(`${result.ingested} records retained. Select an event to review the source mapping.`);
-  } catch(error) { $('#import-dialog').close(); notify(error.message,true); }
-  finally { button.disabled=false; }
+    const data = {source:$('#source-name').value.trim(), record_mode:$('#record-mode').value};
+    if (!data.source) throw new Error('Enter a device or source name.');
+    if (inputMethod === 'file') {
+      if (!chosenFile) throw new Error('Choose a log file first, or switch to Paste logs.');
+      if (!chosenFile.size || chosenFile.size > 2000000) throw new Error('Choose a non-empty file up to 2 MB.');
+      const bytes = new Uint8Array(await chosenFile.arrayBuffer()); let binary = '';
+      for (let i = 0; i < bytes.length; i += 8192) binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+      data.base64 = btoa(binary);
+    } else {
+      data.text = $('#log-input').value;
+      if (!data.text.trim()) throw new Error('Paste the logs you want to add.');
+      if (new TextEncoder().encode(data.text).length > 2000000) throw new Error('Pasted logs exceed the 2 MB limit.');
+    }
+    added = await api('/api/ingest', data);
+    $('#import-dialog').close();
+    $('#log-input').value = ''; $('#log-file').value = ''; selectFile(null);
+    await refresh();
+    changeView('logs'); $('#source-filter').value = added.source; $('#search').value = ''; setFilter('all');
+    const reviewCount = state.events.filter(row => row.source === added.source && isReview(row)).length;
+    notify(`${countText(added.ingested)} added from ${added.source}. ${reviewCount ? 'Open a log marked Needs review to confirm its fields.' : 'Open a log to see its results.'}`);
+  } catch (error) {
+    if (added) notify(`${countText(added.ingested)} were saved, but the display could not refresh. Reconnect to see them; do not upload again.`,true);
+    else { $('#import-error').textContent = error.message; $('#import-error').hidden = false; }
+  } finally { importing = false; button.disabled = !connected; button.textContent = 'Add logs →'; }
 });
-refresh().catch(error=>notify(error.message,true));
+$$('[data-import]').forEach(button => button.disabled = true);
+refresh().catch(() => {});
+setInterval(() => { if (!document.hidden) refresh().catch(() => {}); }, 10000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh().catch(() => {}); });

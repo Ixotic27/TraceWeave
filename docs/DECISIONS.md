@@ -85,3 +85,31 @@ Alternatives: pretend a file watcher can infer architectural intent; depend only
 Consequence: automatic factual capture and a useful human-readable rationale record. The watcher runs only while the development server or standalone watcher is running. Concurrent watcher instances are unsupported; use one per workspace.
 
 Validation: inspect the generated changelog and verify a subsequent change produces an appended entry without rewriting earlier entries.
+
+## ADR-008 — Real-data workspace and plain-language review
+
+Date: 20 September 2026 (Asia/Calcutta). Status: implemented. Supersedes the earlier demonstration-oriented UI and its static response fallback; parsing and review gates are unchanged.
+
+Trigger: the user could not understand the interface and asked to remove prototype/SIH branding, remove testing data, and make the website dynamic.
+
+Decision: organize the interface into Logs, Sources, Activity and How it works. Teach Add logs → Review fields → Export with empty-state guidance. Use plain-language statuses, explicit next actions and meaning-first field selectors. Keep raw content, lineage, schema and result revisions in expandable detail sections. Support file selection, drag/drop and pasted text, stable source names, automatic record framing, source/status/text filters, 25-row pagination and 10-second state refresh.
+
+All runtime state and mutations use the local Python API. Remove the bundled sample payload, static simulated engine, demonstration endpoint, benchmark endpoint and sample buttons. Connection failure leaves previously received data visibly stale and disables mutations; it never manufactures successful ingestion or verification. The static GitHub Pages workflow is not a backend deployment.
+
+Migration: identify sample records by exact source-and-byte pairs, back up SQLite locally, and remove those events and their revisions. Remove mappings and audit entries only for the matching sources that become empty. Preserve unfamiliar records, including different bytes under a sample source name. The executed migration removed 15 known records and left zero active records; the archive remains under ignored `data/archives/`. Retain internal fixtures for regression tests only.
+
+Alternatives: cosmetic renaming with simulated results; clearing the entire database; automatically approving uploads. Rejected because they either mislead users, risk real data, or weaken source review.
+
+Impact: no new dependencies, models, costs or external calls. The user-facing site has no competition/prototype branding. Historical strategy documents retain their context. Vendor adapters, model training, live device collectors and OCSF conformance remain separate unfinished work; public test corpora are not inserted into the clean user workspace.
+
+Validation: HTTP integration checks exercise actual ingestion, approval, export, source reuse, record framing, raw-byte preservation and removed endpoints. Migration checks prove exact matching, backup recovery, preservation of unrelated records and idempotence. Browser checks use a separate in-memory workspace to avoid adding test records to the user's active database. See VERIFICATION.md for results and limits.
+
+## ADR-009 — Vendor semantics before AI suggestions
+
+Date: 20 September 2026. Status: initial implementation.
+
+The next delivery adds versioned FortiGate, pfSense filterlog and Suricata EVE profiles. Profiles specify per-event required fields; network connections and IDS alerts do not require an invented firewall decision. Suricata alert.action cannot be promoted to a final action; that must use verdict.action. FortiGate session states remain additional data. Documented seconds/nanoseconds convert without dropping the original precision. BSD syslog lacks year/timezone, so no full timestamp is fabricated. A changed profile/event class changes the mapping fingerprint and requires review.
+
+150 public Elastic integration fixtures with pinned hashes, expected output companions and license texts were downloaded separately from the empty user workspace. Initial development checks produce 146 candidates passing current field validation; four remain excluded because of unsupported escapes, malformed quoting or protocol vocabulary. This is coverage of the development corpus, not independent accuracy or trained-model performance. Four semantic regression tests were added; all 40 tests pass at the pre-model checkpoint.
+
+AI remains a later optional suggestion component with mandatory human review. Supabase setup is in progress at the user's request; no cloud connection or model is claimed by this checkpoint. The official npm installer encountered a certificate validation error; verification was not disabled.

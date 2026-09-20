@@ -1,4 +1,5 @@
 import http.client
+import base64
 import json
 import os
 import subprocess
@@ -45,17 +46,70 @@ class ServerTests(unittest.TestCase):
         status, _ = self.request("POST", "/api/demo", {"mode":"samples"}, {"Content-Type":"text/plain"})
         self.assertEqual(status,415)
 
-    def test_demo_contracts_and_export(self):
-        status, _ = self.request("POST", "/api/demo", {"mode":"samples"})
+    def test_ingestion_review_export_and_reuse(self):
+        raw = 'src=192.0.2.31 dst=198.51.100.32 action=deny\r\n'
+        status, body = self.request("POST", "/api/ingest", {"source":"  uploaded-firewall  ","text":raw,"record_mode":"auto"})
         self.assertEqual(status,200)
+        self.assertEqual(json.loads(body)["source"],"uploaded-firewall")
         _, body = self.request("GET", "/api/state")
         state = json.loads(body)
-        self.assertEqual(state["counts"]["normalized"],8)
-        self.assertEqual(len(state["contracts"]),7)
+        row = next(r for r in state["events"] if r["source"] == "uploaded-firewall")
+        self.assertEqual(row["status"],"needs_mapping")
+        self.assertEqual(row["raw_text"],raw)
+        status, body = self.request("POST", "/api/approve", {"source":row["source"],"fingerprint":row["fingerprint"],"mapping":row["suggested_mapping"]})
+        self.assertEqual(status,200)
+        self.assertEqual(json.loads(body)["normalized"],1)
         status, export = self.request("GET", "/api/export")
         self.assertEqual(status,200)
-        self.assertEqual(len(export.splitlines()),8)
         self.assertTrue(all(json.loads(line)["status"] == "normalized" for line in export.splitlines()))
+        self.assertTrue(any(json.loads(line)["source"] == "uploaded-firewall" for line in export.splitlines()))
+        self.request("POST", "/api/ingest", {"source":"uploaded-firewall","text":raw.replace('192.0.2.31','192.0.2.33')})
+        _, body = self.request("GET", "/api/state")
+        rows = [r for r in json.loads(body)["events"] if r["source"] == "uploaded-firewall"]
+        self.assertEqual(len(rows),2)
+        self.assertTrue(all(r["status"] == "normalized" for r in rows))
+
+    def test_samples_are_not_exposed(self):
+        self.assertEqual(self.request("POST", "/api/demo", {"mode":"samples"})[0],404)
+        self.assertEqual(self.request("GET", "/demo-data.js")[0],404)
+        self.assertEqual(self.request("GET", "/api/benchmark")[0],404)
+
+    def test_automatic_framing_preserves_pretty_json(self):
+        raw = '{\r\n  "src": "192.0.2.1",\r\n  "dst": "198.51.100.1",\r\n  "action": "deny"\r\n}\r\n'
+        status, body = self.request("POST", "/api/ingest", {"source":"pretty-json", "text":raw, "record_mode":"auto"})
+        self.assertEqual(status,200)
+        self.assertEqual(json.loads(body)["ingested"],1)
+        _, body = self.request("GET", "/api/state")
+        row = next(r for r in json.loads(body)["events"] if r["source"] == "pretty-json")
+        self.assertEqual(row["raw_text"],raw)
+        self.assertEqual(row["format"],"JSON")
+
+    def test_auto_ndjson_and_bad_record_mode(self):
+        raw = '{"src":"192.0.2.1","dst":"198.51.100.1","action":"deny"}\n' * 2
+        status, body = self.request("POST", "/api/ingest", {"source":"ndjson", "text":raw, "record_mode":"auto"})
+        self.assertEqual(status,200)
+        self.assertEqual(json.loads(body)["ingested"],2)
+        self.assertEqual(self.request("POST", "/api/ingest", {"text":raw,"record_mode":"invalid"})[0],400)
+
+    def test_uploaded_bytes_and_comma_values_are_not_mistaken_for_csv(self):
+        raw = b'src=192.0.2.1 dst=198.51.100.2 action=deny note="one,two"\r\n' * 2
+        status, body = self.request("POST", "/api/ingest", {"source":"file-bytes", "base64":base64.b64encode(raw).decode(), "record_mode":"auto"})
+        self.assertEqual(status,200)
+        self.assertEqual(json.loads(body)["ingested"],2)
+        _, body = self.request("GET", "/api/state")
+        rows = [row for row in json.loads(body)["events"] if row["source"] == "file-bytes"]
+        self.assertEqual(b''.join(base64.b64decode(row["raw_base64"]) for row in rows),raw)
+        self.assertTrue(all(row["format"] == "KV" for row in rows))
+
+    def test_auto_csv_xml_and_invalid_json_keep_bytes(self):
+        for source, raw, fmt in [('csv-auto','src,dst,action\r\n192.0.2.3,198.51.100.4,deny\r\n','CSV'),('xml-auto','<event>\n<src>192.0.2.3</src>\n<dst>198.51.100.4</dst>\n<action>deny</action>\n</event>','XML'),('duplicate-auto','{\n"src":"192.0.2.3",\n"src":"192.0.2.4"\n}','Unknown')]:
+            status, body = self.request("POST", "/api/ingest", {"source":source,"text":raw,"record_mode":"auto"})
+            self.assertEqual(status,200)
+            self.assertEqual(json.loads(body)["ingested"],1)
+            _, body = self.request("GET", "/api/state")
+            row = next(r for r in json.loads(body)["events"] if r["source"] == source)
+            self.assertEqual(row["raw_text"],raw)
+            self.assertEqual(row["format"],fmt)
 
     def test_unknown_route_is_404(self):
         status, _ = self.request("GET", "/missing")

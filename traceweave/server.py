@@ -1,15 +1,17 @@
-"""Local-only, dependency-free demonstrator. Run with python -m traceweave.server."""
+"""Local log workspace. Run with python -m traceweave.server."""
 import argparse
 import base64
 import binascii
+import csv
+import io
 import json
+import re
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
 
 from .engine import Engine
-from .fixtures import SAMPLES, DRIFT, ADVERSARIAL
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -52,14 +54,10 @@ class Handler(BaseHTTPRequestHandler):
             except ValueError:
                 return self.send({"error": "Invalid event ID"}, 400)
             return self.send(self.server.engine.history(event_id))
-        if path == "/api/benchmark":
-            file = ROOT / "docs/evidence/benchmark.json"
-            return self.send(json.loads(file.read_text()) if file.exists() else {"status": "Run python scripts/benchmark.py"})
         assets = {
             "/": ("index.html", "text/html; charset=utf-8"),
             "/app.js": ("app.js", "application/javascript"),
             "/style.css": ("style.css", "text/css"),
-            "/demo-data.js": ("demo-data.js", "application/javascript"),
         }
         if path in assets:
             file, typ = assets[path]
@@ -80,34 +78,38 @@ class Handler(BaseHTTPRequestHandler):
                 raise ValueError("Request must be a JSON object")
             engine = self.server.engine
             path = urlparse(self.path).path
-            if path == "/api/demo":
-                mode = data.get("mode", "samples")
-                if mode not in ("samples", "drift", "adversarial"):
-                    raise ValueError("Unknown scenario")
-                samples = {"samples": SAMPLES, "drift": DRIFT, "adversarial": ADVERSARIAL}[mode]
-                rows = [engine.ingest(source, raw) for source, raw in samples]
-                if mode == "samples":
-                    # These are pre-reviewed synthetic fixture mappings, never uploaded records.
-                    reviewed = set()
-                    for row in rows:
-                        key = (row["source"], row["fingerprint"])
-                        if row["status"] == "needs_mapping" and key not in reviewed:
-                            engine.approve(row["source"], row["fingerprint"], row["suggested_mapping"])
-                            reviewed.add(key)
-                return self.send({"ingested": len(rows)})
             if path == "/api/ingest":
                 source = data.get("source", "uploaded-device")
+                if isinstance(source, str):
+                    source = source.strip()
                 raw = base64.b64decode(data["base64"], validate=True) if "base64" in data else data.get("text", "").encode("utf-8")
                 if not raw or len(raw) > 2000000:
                     raise ValueError("Upload must contain 1 byte to 2 MB")
-                records = [raw] if data.get("single_record") else raw.splitlines(keepends=True)
+                mode = data.get("record_mode", "single" if data.get("single_record") else "lines")
+                if mode not in ("auto", "single", "lines"):
+                    raise ValueError("Choose automatic detection, one record per line, or a single record")
+                single = mode == "single"
+                if mode == "auto":
+                    # Detect complete objects without altering their original bytes.
+                    text = raw.decode("utf-8", errors="replace").strip()
+                    if text.startswith("{"):
+                        try:
+                            single = isinstance(json.loads(text), dict)
+                        except (ValueError, RecursionError):
+                            pass
+                    elif text.startswith("<") and not text[1:2].isdigit():
+                        single = True
+                    elif len(raw.splitlines()) == 2 and b"," in raw.splitlines()[0]:
+                        header = next(csv.reader(io.StringIO(text)), [])
+                        single = len(header) > 1 and all(re.fullmatch(r"[A-Za-z_][\w. /-]*", key) for key in header)
+                records = [raw] if single else raw.splitlines(keepends=True)
                 if len(records) > 2000 or any(len(record) > 262144 for record in records):
                     raise ValueError("Limit: 2,000 records, 256 KiB per raw record")
                 if len(engine.latest()) + len(records) > 10000:
-                    raise ValueError("Demo database limit: 10,000 records; use a separate --db file")
+                    raise ValueError("Workspace limit: 10,000 records. Start a separate workspace with --db.")
                 for record in records:
                     engine.ingest(source, record)
-                return self.send({"ingested": len(records)})
+                return self.send({"ingested": len(records), "source": source})
             if path == "/api/approve":
                 return self.send(engine.approve(data["source"], data["fingerprint"], data["mapping"]))
             if path == "/api/rollback":

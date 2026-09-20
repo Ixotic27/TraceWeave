@@ -12,9 +12,9 @@ For the prioritized remaining work, verified FortiGate/pfSense/Suricata source l
 | Database | Python `sqlite3`, SQLite BLOB and JSON-text columns | Included | Original bytes, contracts, result versions, audit |
 | Core libraries | `json`, `csv`, `re`, `xml.etree.ElementTree`, `hashlib`, `ipaddress`, `datetime`, `http.server`, `base64`, `unittest` | Python standard library | Explicit, reproducible behavior |
 | UI | HTML5, CSS, browser JavaScript | Local static files, no CDN | Evidence review and correction |
-| Datasets | `traceweave/fixtures.py`; generated evaluation records in `scripts/benchmark.py` | Authored synthetic data; reserved example address ranges | Seven bounded formats; drift and invalid-input demos |
+| Development datasets | `traceweave/fixtures.py`; generated evaluation records in `scripts/benchmark.py` | Authored synthetic data; reserved example address ranges | Automated checks only; not loaded or served by the application |
 | Compute | A CPU laptop, browser, and available disk space | Existing hardware | Run the demo; no GPU dependency |
-| Hosting | `http://127.0.0.1:8765` | Localhost | Offline demonstration |
+| Hosting | `http://127.0.0.1:8765` | Localhost | Local application; backend required, no static simulation |
 | Automated checks | `python -m unittest discover -s tests -v` | Included | Meaningful behavior and persistence tests |
 | Packaging | `run.ps1`; optional `Dockerfile` based on `python:3.12-slim` | Native launcher tested; container not built here | Reproducible startup |
 

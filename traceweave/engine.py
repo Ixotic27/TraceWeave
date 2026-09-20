@@ -13,6 +13,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree as ET
+from .adapters import pfsense_record, profile_for, profile_value
 
 TARGETS = ("src_ip", "dst_ip", "src_port", "dst_port", "action", "timestamp", "protocol")
 REQUIRED = ("src_ip", "dst_ip", "action")
@@ -66,6 +67,10 @@ def parse_record(raw):
         raise ValueError("Empty record retained as raw evidence")
     if len(raw) > 65536:
         raise ValueError("Record exceeds 64 KiB parser limit")
+    if "filterlog" in text:
+        parsed = pfsense_record(text)
+        if parsed:
+            return parsed
     if text.startswith("{"):
         fields = flatten(json.loads(text, object_pairs_hook=pairs_unique))
         return "JSON", fields
@@ -173,21 +178,22 @@ def convert(target, value):
     raise ValueError("Unsupported target")
 
 
-def normalize(fields, mapping):
+def normalize(fields, mapping, profile=None):
     canonical, lineage, errors = {}, {}, []
     for source, target in mapping.items():
         if source not in fields:
             errors.append(f"Missing source field: {source}")
             continue
         try:
-            value = convert(target, fields[source])
+            adapted, transform = profile_value(profile, source, target, fields[source]) if profile else (fields[source], None)
+            value = adapted if transform == "fortigate-epoch/1" else convert(target, adapted)
             if target in canonical:
                 errors.append(f"Ambiguous mapping: multiple fields target {target}")
             canonical[target] = value
-            lineage[target] = {"selector": source, "original_value": fields[source], "transform": "validate-and-normalize/1"}
+            lineage[target] = {"selector": source, "original_value": fields[source], "transform": transform or "validate-and-normalize/1"}
         except (ValueError, TypeError, OverflowError) as exc:
             errors.append(str(exc))
-    for field in REQUIRED:
+    for field in profile["required"] if profile else REQUIRED:
         if field not in canonical:
             errors.append(f"Required field unavailable: {field}")
     extras = {k: v for k, v in fields.items() if k not in mapping}
@@ -230,11 +236,13 @@ class Engine:
         else:
             try:
                 fmt, fields = parse_record(raw)
-                fp = fingerprint(fmt, fields)
-                result.update(format=fmt, fields=fields, fingerprint=fp, suggested_mapping=suggest(fields))
+                profile = profile_for(fmt, fields)
+                fp = fingerprint(fmt if profile["id"] == "generic/1" else fmt + ":" + profile["id"] + ":" + profile["event_class"], fields)
+                proposed = suggest(fields) if profile["id"] == "generic/1" else profile["mapping"]
+                result.update(format=fmt, fields=fields, fingerprint=fp, suggested_mapping=proposed, profile=profile, event_class=profile["event_class"], warnings=profile["warnings"])
                 contract = self.db.execute("SELECT * FROM contracts WHERE source=? AND fingerprint=? AND active=1 ORDER BY version DESC LIMIT 1", (row["source"], fp)).fetchone()
-                mapping = json.loads(contract["mapping"]) if contract else suggest(fields)
-                canonical, lineage, extras, errors = normalize(fields, mapping)
+                mapping = json.loads(contract["mapping"]) if contract else proposed
+                canonical, lineage, extras, errors = normalize(fields, mapping, profile)
                 result.update(canonical=canonical, lineage=lineage, unmapped=extras, errors=errors)
                 if contract:
                     result["contract_version"] = contract["version"]
@@ -263,7 +271,7 @@ class Engine:
             raise ValueError("No matching records to validate")
         checks = []
         for row in rows:
-            _, _, _, errors = normalize(row["fields"], mapping)
+            _, _, _, errors = normalize(row["fields"], mapping, row.get("profile"))
             checks.append({"id": row["id"], "valid": not errors, "errors": errors})
         if not any(check["valid"] for check in checks):
             raise ValueError("Mapping validates no records: " + "; ".join(checks[0]["errors"]))

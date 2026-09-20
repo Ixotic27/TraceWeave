@@ -1,8 +1,34 @@
 # Verification report
 
-Date: 19 September 2026. Runtime: Python 3.12.14 on Windows. Results describe the local prototype, not production certification.
+Updated: 20 September 2026 (Asia/Calcutta). Runtime: Python 3.12.14 on Windows. These are local behavior checks, not production certification.
 
-## Automated behavior checks
+## Current interface migration
+
+The current UI starts empty, exposes no sample-loading or benchmark controls, and has no simulated API fallback. `web/demo-data.js` was removed. A case-insensitive scan of `web/` for SIH, prototype, demo, mock, fixture and benchmark returns no matches.
+
+**36 tests passed** with `python -m unittest discover -s tests -v`: 24 engine checks, 10 HTTP integration checks, and two sample-cleanup checks. JavaScript syntax validation (`node --check web/app.js`) and `git diff --check` also passed. Added coverage includes actual upload/review/export/source reuse; pretty JSON, XML, one-row CSV and NDJSON framing; duplicate JSON retention; base64 file bytes with CRLF; comma-containing KV values; invalid record modes; removed runtime endpoints; exact-match cleanup, restorable backup, unrelated-data preservation and idempotence.
+
+Cleanup tests initially failed because Python's restrictive temporary-directory permissions were incompatible with this Windows sandbox. They now create unique, normally inherited directories under `data/cleanup-tests/` and verify the resolved parent before cleanup. No tests require broader machine permissions.
+
+The migration removed 15 exact known sample records from `data/traceweave.sqlite3`, leaving zero active records. The complete pre-migration database was backed up to `data/archives/before-sample-removal-20260919T204428385097Z.sqlite3`. Main-workspace tests do not inject new records.
+
+Browser verification used a separate server on port 8766 with an in-memory database:
+
+- Empty workspace, disabled export and initial three-step instructions.
+- Missing-file validation stays in the Add logs dialog and preserves the entered source name.
+- Pasted two logs; both appeared as Needs review, with the source selected.
+- Reviewed suggested meanings and saved field settings; both logs became Ready to export. Sources showed the correct counts and Activity showed the saved version.
+- Original-byte check and export actions completed. An independent API check later confirmed 29 exported records, all validated, while an unsupported 30th record was excluded.
+- Added further records through the local API and observed the page automatically update to 30 total / 29 ready / 1 unable to process, without a manual refresh.
+- Verified pagination (25 per page), search with no matches, Clear filters, and the Couldn't process status filter.
+- Opened the unsupported log and confirmed an actionable explanation and access to retained originals.
+- Stopped only the isolated test server; the UI showed Server unavailable, explicitly identified the last received records as stale and disabled upload/export actions.
+
+The 1,265-pixel desktop layout was visually reviewed; current screenshots are retained separately from the older preview. Responsive CSS is included, but mobile viewport behavior and the operating-system file picker/drag-drop interaction have not been independently exercised. The file ingestion API and byte round trip were tested. No new throughput or ML accuracy claim is made.
+
+The following sections retain the initial implementation evidence from September 19. Their sample-data UI describes the earlier version, not the current application.
+
+## Earlier automated behavior checks (September 19)
 
 Command: `python -m unittest discover -s tests -v`
 

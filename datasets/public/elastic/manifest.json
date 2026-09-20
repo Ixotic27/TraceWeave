@@ -1,0 +1,129 @@
+{
+  "repository": "https://github.com/elastic/integrations",
+  "commit": "4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24",
+  "purpose": "Development/reference fixtures, not production logs or an independent field-label benchmark",
+  "files": [
+    {
+      "path": "LICENSE.txt",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/LICENSE.txt",
+      "sha256": "1ab1ac1cf67b4360986b5cd0448bfa320f9b34cacf46abce32b36b0c7fc71ed6",
+      "bytes": 401,
+      "role": "license"
+    },
+    {
+      "family": "fortinet_fortigate",
+      "path": "fortinet_fortigate/test-fortinet-7-4.log",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/fortinet_fortigate/data_stream/log/_dev/test/pipeline/test-fortinet-7-4.log",
+      "sha256": "ef04aa4d229c924ee2a0fd44923cbe412392ea40a37b083ba756857d7a671d97",
+      "bytes": 41372,
+      "lines": 82,
+      "role": "input"
+    },
+    {
+      "family": "fortinet_fortigate",
+      "path": "fortinet_fortigate/test-fortinet-7-4.log-expected.json",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/fortinet_fortigate/data_stream/log/_dev/test/pipeline/test-fortinet-7-4.log-expected.json",
+      "sha256": "e3152293cddf014aaf3b5b896c64d806c8872ece36d22b73d4b2b9a4f27dcad1",
+      "bytes": 244947,
+      "lines": 6426,
+      "role": "expected"
+    },
+    {
+      "family": "fortinet_fortigate",
+      "path": "fortinet_fortigate/test-fortinet-7-2.log",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/fortinet_fortigate/data_stream/log/_dev/test/pipeline/test-fortinet-7-2.log",
+      "sha256": "f70ceda157b17dc9151dc7bc58eccff13a197b0356fbde356947dfad13c6774f",
+      "bytes": 7672,
+      "lines": 7,
+      "role": "input"
+    },
+    {
+      "family": "fortinet_fortigate",
+      "path": "fortinet_fortigate/test-fortinet-7-2.log-expected.json",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/fortinet_fortigate/data_stream/log/_dev/test/pipeline/test-fortinet-7-2.log-expected.json",
+      "sha256": "bb6b797f98987db075899ad4eeea5adc3e7a884b959820aa7082ebcaf3eaef36",
+      "bytes": 34443,
+      "lines": 784,
+      "role": "expected"
+    },
+    {
+      "family": "pfsense",
+      "path": "pfsense/test-pfsense-bsd.log",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/pfsense/data_stream/log/_dev/test/pipeline/test-pfsense-bsd.log",
+      "sha256": "50305fde1c67622d7738e467a736a5cc3bee157ea1007bf0273e58fa3678ab1a",
+      "bytes": 3582,
+      "lines": 20,
+      "role": "input"
+    },
+    {
+      "family": "pfsense",
+      "path": "pfsense/test-pfsense-bsd.log-expected.json",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/pfsense/data_stream/log/_dev/test/pipeline/test-pfsense-bsd.log-expected.json",
+      "sha256": "88db29a4d197f3d98778c41551a1071200cce61133f3b7c2fc81d6a7c928b39d",
+      "bytes": 67975,
+      "lines": 2098,
+      "role": "expected"
+    },
+    {
+      "family": "pfsense",
+      "path": "pfsense/test-pfsense-syslog.log",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/pfsense/data_stream/log/_dev/test/pipeline/test-pfsense-syslog.log",
+      "sha256": "e06781cbb88d91a54fd69060ba9c0dfcf22dae11c901e8f0cbd78a74b9bdf5fc",
+      "bytes": 3464,
+      "lines": 16,
+      "role": "input"
+    },
+    {
+      "family": "pfsense",
+      "path": "pfsense/test-pfsense-syslog.log-expected.json",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/pfsense/data_stream/log/_dev/test/pipeline/test-pfsense-syslog.log-expected.json",
+      "sha256": "ebd895b345eee4e5f766346fc2658ae3c12d149ea9ebb156370e5f7bce394c39",
+      "bytes": 52583,
+      "lines": 1614,
+      "role": "expected"
+    },
+    {
+      "family": "suricata",
+      "path": "suricata/test-eve-6-0.log",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/suricata/data_stream/eve/_dev/test/pipeline/test-eve-6-0.log",
+      "sha256": "632b6be798370bb1d2a311ca2714e25f3abda89072c8458e303a9dba47e0eb0e",
+      "bytes": 2046,
+      "lines": 3,
+      "role": "input"
+    },
+    {
+      "family": "suricata",
+      "path": "suricata/test-eve-6-0.log-expected.json",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/suricata/data_stream/eve/_dev/test/pipeline/test-eve-6-0.log-expected.json",
+      "sha256": "0b08ca4a1a7849c6b876020ac2c2b86c4971585101341e35316eea86519bdb51",
+      "bytes": 11522,
+      "lines": 285,
+      "role": "expected"
+    },
+    {
+      "family": "suricata",
+      "path": "suricata/test-eve-alerts.log",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/suricata/data_stream/eve/_dev/test/pipeline/test-eve-alerts.log",
+      "sha256": "9b85e83c8db440cad6811ba77faf2b2081cf514568eba1ddb0869028a334377d",
+      "bytes": 18716,
+      "lines": 22,
+      "role": "input"
+    },
+    {
+      "family": "suricata",
+      "path": "suricata/test-eve-alerts.log-expected.json",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/packages/suricata/data_stream/eve/_dev/test/pipeline/test-eve-alerts.log-expected.json",
+      "sha256": "a7574f9c754096f9e1994056f2cfe2724cc0005a193bb338096c7569adc0aaa1",
+      "bytes": 119974,
+      "lines": 2888,
+      "role": "expected"
+    },
+    {
+      "path": "upstream-licenses/licenses__Elastic-2.0.txt",
+      "url": "https://raw.githubusercontent.com/elastic/integrations/4f0750dd4ec7cfa1e74e3a9e975a2fe04f63fd24/licenses/Elastic-2.0.txt",
+      "sha256": "48255018b41fc0e965b1115af7e6779bc218bb8a6747d561da800d5022622aa2",
+      "bytes": 3860,
+      "role": "license"
+    }
+  ]
+}

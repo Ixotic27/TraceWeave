@@ -5,6 +5,9 @@ data/
 .pytest_cache/
 .venv/
 .env
+.env.*
+!.env.example
+.tools/
+supabase/.temp/
 .DS_Store
 Thumbs.db
-

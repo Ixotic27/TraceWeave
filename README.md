@@ -3,9 +3,7 @@
 [![Deploy to GitHub Pages](https://github.com/Ixotic27/TraceWeave/actions/workflows/deploy.yml/badge.svg)](https://github.com/Ixotic27/TraceWeave/actions/workflows/deploy.yml)
 [![Tests & Verification](https://github.com/Ixotic27/TraceWeave/actions/workflows/test.yml/badge.svg)](https://github.com/Ixotic27/TraceWeave/actions/workflows/test.yml)
 
-🌐 **Live Demo:** [https://ixotic27.github.io/TraceWeave/](https://ixotic27.github.io/TraceWeave/)
-
-A free, offline working prototype for **SIH26156: Universal Log Pre-processing Framework**.
+A free, local workspace for making device logs consistent and understandable.
 
 TraceWeave retains original log bytes, normalizes reviewed source mappings, detects structural changes, and replays affected records after a correction. Every normalized field retains source lineage. Unknown or invalid records remain available but are excluded from validated export.
 
@@ -27,21 +25,35 @@ python -m traceweave.server --watch-docs
 
 No `pip install`, Node build, paid API, account, GPU, or Internet connection is required at runtime. Python 3.12.14 is the tested runtime. The application binds to `127.0.0.1` and is designed for a single local user.
 
-## Demonstrate the difference
+## Use your workspace
 
-1. Click **Load known sources**. Eight synthetic events from seven bounded formats load with pre-reviewed fixture mappings.
-2. Click **Change a device format**. On a fresh database, two new events show **Schema drift** and are withheld from validated export.
-3. Open a drift event. Map **origin → src_ip**, then click **Approve mapping and replay**. Both retained events are reprocessed; historical revisions remain available.
-4. Click **Challenge the parser**. Duplicate keys, an invalid port, an unknown action and binary data remain excluded from export.
-5. Click **Verify raw bytes**. Inspect an event's field lineage, download its original bytes, and export validated NDJSON.
+1. Choose **Add logs**, name your device, and upload a file or paste its logs. Reuse that source name for future uploads.
+2. Open a log marked **Needs review**. Check Source IP, Destination IP, Action, and the optional fields against your device documentation. Choose **Save settings & process logs**.
+3. All matching logs from that source are reprocessed. Future uploads with the same structure reuse the saved settings. A changed structure is marked **Format changed** for review.
+4. Choose **Export ready logs** to download reviewed records as NDJSON. Records needing review or failing validation are excluded, while their originals remain saved.
+5. Use **Sources** to see devices and saved field settings, **Activity** for decisions, and **How it works** for explanations. Open a log's expandable details to download its original bytes or inspect processing history.
 
-Demo buttons append events. Once a changed structure is approved, clicking the same drift scenario again correctly uses that saved contract. For a clean rehearsal without deleting existing data, use a new database:
+The workspace starts empty. There are no sample-loading buttons or simulated API responses. Counts, source summaries, filters and export availability come from the local database. The visible page refreshes every 10 seconds; this refresh does not collect logs directly from a device. Add files, paste text, or submit logs through `POST /api/ingest`.
+
+To open a separate workspace without changing existing data:
 
 ```powershell
-python -m traceweave.server --db data/rehearsal-02.sqlite3 --port 8766
+python -m traceweave.server --db data/another-workspace.sqlite3 --port 8766
 ```
 
-Open [the rehearsal instance](http://127.0.0.1:8766). Keep source names stable when importing your own records. New uploaded sources always require review.
+Open [the separate workspace](http://127.0.0.1:8766).
+
+### Hosting and connection
+
+Run the Python server to process logs. The existing GitHub Pages workflow publishes static frontend files only; it cannot run this backend. When no backend is available, the page displays connection instructions and disables uploads rather than showing fabricated results. No cloud service is required for local operation.
+
+### Local ingestion API
+
+Send JSON to `POST http://127.0.0.1:8765/api/ingest` with a stable `source`, and either `text` or `base64` for original file bytes. `record_mode` accepts `auto`, `lines`, or `single`. Automatic mode recognizes complete JSON objects, flat XML, and a CSV header plus one row; other inputs are split at line boundaries with line endings retained. Existing `single_record` clients remain compatible. Limits: 2 MB per upload, 2,000 records per request and 10,000 records per workspace.
+
+### Removal of earlier sample records
+
+The September 20 interface migration removed 15 exact known sample records from the local workspace after backing up the database under `data/archives/`. Unrecognized records are preserved. For an older installation, stop the server and run `python scripts/remove_sample_data.py`; the script is idempotent and only matches known source-and-byte pairs. Development fixtures remain in tests and the benchmark, separate from the application.
 
 ## Validation
 
@@ -63,10 +75,10 @@ The benchmark uses synthetic records and a clearly defined fixed-mapping baselin
 
 ## Scope
 
-Implemented formats are bounded subsets: JSON objects; key/value records; Syslog with KV payload; CEF header plus a constrained KV extension; LEEF 1.0 tab-separated attributes; flat XML; and a CSV header plus one row. For pretty JSON, XML, or two-line CSV, select **Treat the entire input as one record**. Full vendor/RFC grammar coverage and multirow CSV framing are future work.
+Implemented formats are bounded subsets: JSON objects; key/value records; Syslog with KV payload; CEF header plus a constrained KV extension; LEEF 1.0 tab-separated attributes; flat XML; and a CSV header plus one row. Automatic reading handles complete JSON objects, XML and two-line CSV. Use **Reading options → Entire input is one record** to override detection. Full vendor/RFC grammar coverage and multirow CSV framing are future work.
 
 The custom output schema is `traceweave.network/0.1`; it is not certified or validated OCSF. No LLM or trained ML model is included. Structural changes are detected, but changes in meaning with identical keys/types may require additional domain validation.
 
-Data stays in `data/traceweave.sqlite3`. Raw content also appears in result revisions for convenient evidence export, increasing storage overhead. SHA-256 verifies local byte consistency; it does not authenticate a device or prevent a local administrator from altering the database. The prototype does not claim enterprise availability, access control, regulatory compliance, or billion-event throughput.
+Data stays in `data/traceweave.sqlite3`. Raw content also appears in result revisions for convenient evidence export, increasing storage overhead. SHA-256 verifies local byte consistency; it does not authenticate a device or prevent a local administrator from altering the database. Enterprise availability, access control, regulatory compliance, and billion-event throughput have not been implemented or established.
 
 The Dockerfile is an untested optional packaging recipe. Because the server binds loopback, use native Python on Windows; the commented Linux host-network option is intended only for a local demonstration.

@@ -4,9 +4,11 @@ Updated 19 September 2026 in response to the user's request for remaining work, 
 
 ## Current status
 
-The local prototype implements raw retention, constrained format parsers, source-mapping review, structural drift detection, replay, rollback, provenance and validated NDJSON export. The existing verification report records 29 passing tests and a synthetic evaluation. Real vendor coverage, full OCSF conformance and a measured 10x advantage are not established.
+The local application implements raw retention, constrained format parsers, source-mapping review, structural drift detection, replay, rollback, provenance and validated NDJSON export. On September 20 the interface was simplified around real uploads, review and export; sample records, sample controls, evaluation UI and simulated responses were removed. The visible workspace refreshes every 10 seconds. Direct collection from devices is still future work. See the updated verification report for current checks. Real vendor coverage, full OCSF conformance and a measured 10x advantage are not established.
 
 ## Build priorities
+
+September 20 checkpoint: initial FortiGate/pfSense/Suricata profiles and event-specific field requirements are now implemented with 150 pinned public reference records kept outside the UI. Four records remain unsupported in the initial development check. Full vendor coverage, independent field validation, AI training, Supabase setup and live collection remain work in progress. The user requested this checkpoint be committed and pushed before AI work continues.
 
 | Priority | Work remaining | Evidence needed to call it done |
 | --- | --- | --- |

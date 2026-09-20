@@ -32,7 +32,7 @@ flowchart LR
 - **Contract registry:** source name plus format/key/type fingerprint identifies a structure. Mappings are reviewed and versioned. Aliases propose mappings without inventing semantics.
 - **Validation:** IP addresses, ports, known action/protocol vocabulary and explicit timestamp timezone. This network demonstration requires source IP, destination IP and action. Unknown extra fields remain available.
 - **Replay and provenance:** retain each result revision. Each normalized field records a source selector, original value, transform version, raw hash and contract version. JSON selectors use JSON Pointer. Approval replays affected records; rollback restores the prior contract and appends new result revisions.
-- **UI and export:** event stream, review dialog, raw-byte download, contracts, decision history, integrity checks and validated NDJSON export. Candidate values are identified as unapproved.
+- **UI and export:** an empty initial workspace with Add logs → Review fields → Export flow; source summaries and decision activity; 25-row pagination, source/status/text filters and 10-second state refresh. Field settings, raw-byte downloads and technical history are available in the detail dialog. Candidate values are identified as unapproved. All actions use the local API; unavailable connections show an error, never a simulated response. Static hosting cannot execute the backend.
 
 ## Data model and runtime
 
