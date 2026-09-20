@@ -24,7 +24,7 @@ def main():
     if manifest_path.exists():
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         fetch_licenses(manifest)
-        manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+        manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8", newline="\n")
         print("Verified pinned dataset and retained license notices.")
         return
     commit = json.loads(fetch("https://api.github.com/repos/elastic/integrations/commits/main"))["sha"]
@@ -59,7 +59,7 @@ def main():
                 manifest["files"].append({"family":family,"path":destination.relative_to(OUT).as_posix(),"url":base+path+"/"+filename,"sha256":hashlib.sha256(content).hexdigest(),"bytes":len(content),"lines":len(content.splitlines()),"role":"expected" if "expected" in filename else "input"})
                 print(f"Downloaded {family}/{filename}: {len(content)} bytes", flush=True)
     fetch_licenses(manifest)
-    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8", newline="\n")
     print(f"Pinned {commit}; {len(manifest['files'])} files")
 
 
