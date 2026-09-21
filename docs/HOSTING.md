@@ -1,5 +1,14 @@
 # TraceWeave online
 
+Deployed 21 September 2026: https://traceweave.onrender.com
+
+- Render service: `srv-daokffrtqb8s73fn4340`, Singapore, **Free**.
+- Supabase project: `dlyxamexvbewnniwaime`, existing **Free** organization.
+- Render reported the initial deployment live; the public sign-in page loaded
+  without browser errors. The Auth Site URL now points to the live HTTPS address.
+- Authenticated upload/save on the live service still needs the owner's first
+  account sign-in. No sample records or user accounts were seeded for deployment.
+
 Render Free runs the website, parser and saved GPU-trained field model. Supabase
 Free provides authentication and durable private workspaces. No local server or
 paid model API is needed. Training remains GPU-only on the development laptop;

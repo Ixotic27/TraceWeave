@@ -79,3 +79,11 @@ On this computer, the CLI initially could not validate the HTTPS certificate
 chain. A public CA bundle exported from the Windows trust store under ignored
 `.tools/` resolved that issue through `NODE_EXTRA_CA_CERTS`. TLS validation was
 never disabled. The PowerShell wrapper uses that bundle when present.
+# Hosted workspace addition — 21 September 2026
+
+The dedicated project also stores complete online workspaces for
+https://traceweave.onrender.com. Migration `202609210001_hosted_workspaces.sql`
+was applied: authenticated users can read only their own workspace, while saves
+use an owner-scoped atomic RPC. Render uses the publishable key and user token;
+it has no service-role key or database password. The sections below describe the
+separate, optional export connection used by the offline app. See HOSTING.md.

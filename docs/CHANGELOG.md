@@ -342,3 +342,12 @@ Add private hosted workspaces, durable Supabase storage, and Render Free deploym
 - Modified: `web/app.js`
 - Modified: `web/index.html`
 - Modified: `web/style.css`
+
+## 2026-09-21T15:08:39.316339+00:00
+
+Record the live free Render URL, applied Supabase migration, and first-account onboarding limits.
+
+- Modified: `docs/HOSTING.md`
+- Modified: `docs/NEXT_STEPS.md`
+- Modified: `docs/SUPABASE.md`
+- Modified: `README.md`

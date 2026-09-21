@@ -1,5 +1,11 @@
 # Remaining work and free data sources
 
+Hosting update, 21 September 2026: the online service is deployed at
+https://traceweave.onrender.com with a sign-in screen, saved model inference, and
+owner-scoped Supabase workspace persistence. The owner still needs to create and
+confirm the first app account. Broad public registration requires an email provider;
+the default Supabase sender delivers only to project team addresses. See HOSTING.md.
+
 Updated 20 September 2026. This page distinguishes delivered functionality from work that still needs evidence.
 
 ## Current status

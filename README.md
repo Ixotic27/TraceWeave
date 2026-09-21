@@ -1,5 +1,11 @@
 # TraceWeave
 
+**Online:** [traceweave.onrender.com](https://traceweave.onrender.com)
+
+Create an account and sign in. Initial email delivery is limited to the Supabase
+project team until an email provider is configured. Free hosting can take a moment
+to wake up after inactivity. Local instructions below remain available for offline use.
+
 [![Deploy to GitHub Pages](https://github.com/Ixotic27/TraceWeave/actions/workflows/deploy.yml/badge.svg)](https://github.com/Ixotic27/TraceWeave/actions/workflows/deploy.yml)
 [![Tests & Verification](https://github.com/Ixotic27/TraceWeave/actions/workflows/test.yml/badge.svg)](https://github.com/Ixotic27/TraceWeave/actions/workflows/test.yml)
 
