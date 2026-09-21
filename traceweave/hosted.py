@@ -235,7 +235,7 @@ class HostedHandler(Handler):
                 self.set_cookie(f"__Host-traceweave-oauth-state={state}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600")
                 self.set_cookie(f"__Host-traceweave-oauth-verifier={verifier}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600")
                 query = urlencode({"provider": "google", "redirect_to": self.server.origin + "/",
-                    "code_challenge": challenge, "code_challenge_method": "S256"})
+                    "state": state, "code_challenge": challenge, "code_challenge_method": "S256"})
                 return self.redirect(self.server.store.url + "/auth/v1/authorize?" + query)
             if not mutation and path in ("/api/auth/google/callback", "/") and parse_qs(urlparse(self.path).query).get("code"):
                 cookies = SimpleCookie(); cookies.load(self.headers.get("Cookie", ""))
