@@ -13,6 +13,9 @@ Simplified the hosted workspace navigation and public-facing account experience.
 - Extended local and hosted static routing for the legal pages.
 - Added a hosted session preload state to prevent authentication view flicker on refresh.
 - Renamed the top-right connection indicator to a plain status label and replaced the refresh glyph with an outline icon.
+- Ignored blank lines during line-based uploads so one pasted record cannot create an extra empty error.
+- Replaced technical model wording in the record details with plain-language field-match guidance.
+- Added `docs/EASY_GUIDE.md` with the problem, solution, usage steps, limits, and model recommendation.
 
 ## 2026-09-19T15:44:20.880561+00:00
 

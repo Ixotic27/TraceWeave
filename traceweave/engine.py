@@ -307,19 +307,28 @@ class Engine:
         return {"version": previous["version"], "replayed": len(rows)}
 
     def latest(self):
-        return [json.loads(row[0]) for row in self.db.execute("SELECT r.payload FROM results r JOIN (SELECT event_id,MAX(id) id FROM results GROUP BY event_id) x ON r.id=x.id ORDER BY r.event_id")]
+        rows = []
+        for stored in self.db.execute("SELECT r.payload FROM results r JOIN (SELECT event_id,MAX(id) id FROM results GROUP BY event_id) x ON r.id=x.id ORDER BY r.event_id"):
+            payload = json.loads(stored[0])
+            # Blank separator lines are not events. Older uploads may contain
+            # one from a pasted file, so keep them out of workspace counts too.
+            if payload.get("raw_text", "").strip():
+                rows.append(payload)
+        return rows
 
     def history(self, event_id):
         return [json.loads(r[0]) for r in self.db.execute("SELECT payload FROM results WHERE event_id=? ORDER BY revision", (event_id,))]
 
     def verify(self):
         rows = self.db.execute("SELECT id,raw,sha256 FROM events").fetchall()
-        failed = [r["id"] for r in rows if digest(bytes(r["raw"])) != r["sha256"]]
-        return {"records": len(rows), "verified": len(rows) - len(failed), "failed": failed, "scope": "Local byte integrity, not proof of origin or tamper-proof storage"}
+        meaningful = [r for r in rows if bytes(r["raw"]).strip()]
+        failed = [r["id"] for r in meaningful if digest(bytes(r["raw"])) != r["sha256"]]
+        return {"records": len(meaningful), "verified": len(meaningful) - len(failed), "failed": failed, "scope": "Local byte integrity, not proof of origin or tamper-proof storage"}
 
     def export(self):
         return [r for r in self.latest() if r["status"] == "normalized"]
 
     def state(self):
         rows = self.latest()
-        return {"events": rows, "counts": {s: sum(r["status"] == s for r in rows) for s in ("normalized", "needs_mapping", "drift", "quarantined")}, "raw_bytes": self.db.execute("SELECT COALESCE(SUM(length(raw)),0) FROM events").fetchone()[0], "audit": [dict(r) for r in self.db.execute("SELECT * FROM audit ORDER BY id DESC LIMIT 30")], "contracts": [dict(r) for r in self.db.execute("SELECT * FROM contracts ORDER BY source,version")], "targets": TARGETS}
+        raw_bytes = sum(len(base64.b64decode(row["raw_base64"])) for row in rows)
+        return {"events": rows, "counts": {s: sum(r["status"] == s for r in rows) for s in ("normalized", "needs_mapping", "drift", "quarantined")}, "raw_bytes": raw_bytes, "audit": [dict(r) for r in self.db.execute("SELECT * FROM audit ORDER BY id DESC LIMIT 30")], "contracts": [dict(r) for r in self.db.execute("SELECT * FROM contracts ORDER BY source,version")], "targets": TARGETS}

@@ -176,7 +176,7 @@ function inspect(id) {
   $('#detail-source').textContent = `${row.source} · ${row.format}`;
   $('#detail-title').textContent = `Log #${row.id}`;
   $('#detail-content').innerHTML = `<div class="detail-summary"><span class="status ${row.status}">${labels[row.status]}</span><p>${explanations[row.status]}</p></div><div id="detail-error" class="form-error" role="alert" hidden></div>${errors.length ? `<div class="validation-note"><strong>What needs attention</strong><ul>${errors.map(error => `<li>${esc(friendlyError(error))}</li>`).join('')}</ul></div>` : ''}
-    ${row.ai_suggestions?.length ? `<div class="ai-note"><strong>Local AI suggested ${row.ai_suggestions.length} field matches</strong><p>${row.ai_suggestions.map(item => `${esc(item.field)} → ${esc(fieldNames[item.target])}`).join(' · ')}</p><small>Suggestions can be wrong. Confirm their meaning before saving. AI runs on this computer.</small></div>` : ''}
+    ${row.ai_suggestions?.length ? `<div class="ai-note"><strong>${row.ai_suggestions.length === 1 ? 'Possible field match' : 'Possible field matches'}</strong><p>${row.ai_suggestions.map(item => `${esc(item.field)} → ${esc(fieldNames[item.target])}`).join(' · ')}</p><small>Check the meaning against your device documentation before saving.</small></div>` : ''}
     ${row.warnings?.length ? `<div class="validation-note"><strong>About this log type</strong><ul>${row.warnings.map(message => `<li>${esc(message)}</li>`).join('')}</ul></div>` : ''}
     <h3>${row.status === 'normalized' ? 'Reviewed fields' : 'Suggested fields'}</h3><dl class="field-values">${Object.entries(fieldNames).map(([target,label]) => `<div><dt>${label}</dt><dd>${esc(row.canonical[target] ?? 'Not identified')}</dd></div>`).join('')}</dl>
     ${keys.length ? `<details class="mapping-section" ${row.status !== 'normalized' ? 'open' : ''}><summary>${row.status === 'normalized' ? 'Edit field settings' : 'Review field settings'}</summary><p>Match each meaning on the left to a field in your log. Check your device’s documentation if you’re unsure. Required fields must be assigned.</p><div id="mapping-fields">${Object.entries(fieldNames).map(([target,label]) => `<div class="mapping-row"><label for="map-${target}">${label} ${required.includes(target) ? '<span class="required-label">Required</span>' : '<span class="optional-label">Optional</span>'}<small>${fieldHelp[target]}</small></label><select id="map-${target}" data-target="${target}"><option value="">${required.includes(target) ? 'Choose a field…' : 'Leave unassigned'}</option>${keys.map((key,index) => `<option value="${index}" ${mapping[key] === target ? 'selected' : ''}>${esc(key)} — ${esc(String(row.fields[key]).slice(0,80))}</option>`).join('')}</select></div>`).join('')}</div><div class="mapping-footer"><p>Applies to ${countText(matching)} with this structure from <strong>${esc(row.source)}</strong>, plus future matches. Invalid values remain excluded from export.</p><div class="detail-actions"><button class="button primary" id="approve" ${!connected ? 'disabled' : ''}>Save settings & process logs</button>${active && state.contracts.some(rule => rule.source === row.source && rule.fingerprint === row.fingerprint && rule.version < active.version) ? `<button class="button" id="rollback" ${!connected ? 'disabled' : ''}>Restore previous settings</button>` : ''}</div></div></details>` : ''}
@@ -296,7 +296,7 @@ setInterval(() => { if (!document.hidden) refresh().catch(() => {}); }, 10000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh().catch(() => {}); });
 
 function loadModelInfo() {
-  api('/api/model').then(info => { if (info.available) { $('#ai-overview').hidden = false; $('#ai-overview-text').textContent = `A small model, trained on ${info.training_device}, helps suggest fields for unfamiliar logs. Known device rules take priority. You review every new structure before export.`; } }).catch(() => {});
+  api('/api/model').then(info => { if (info.available) { $('#ai-overview').hidden = false; $('#ai-overview-text').textContent = 'A field-matching helper suggests likely meanings for unfamiliar names. Known device rules take priority, and you approve every new structure before export.'; } }).catch(() => {});
 }
 
 function showAuth() {
@@ -314,7 +314,7 @@ async function startWorkspace() {
   hosted = session.hosted; authenticated = session.authenticated;
   if (hosted) {
     $('.help-footer').textContent = 'The online service runs in your browser. Free hosting may take a moment to wake up after inactivity.';
-    $('#ai-overview small').textContent = 'The saved model runs on the server without a paid AI API. Uncertain fields remain unassigned.';
+    $('#ai-overview small').textContent = 'Check each suggested match before saving. Uncertain fields remain unassigned.';
     $('#sign-out').hidden = false;
     if (!authenticated) {
       showAuth();

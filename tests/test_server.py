@@ -101,6 +101,16 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(json.loads(body)["ingested"],2)
         self.assertEqual(self.request("POST", "/api/ingest", {"text":raw,"record_mode":"invalid"})[0],400)
 
+    def test_blank_lines_do_not_create_empty_events(self):
+        raw = 'src=192.0.2.1 dst=198.51.100.1 action=deny\r\n\r\n'
+        status, body = self.request("POST", "/api/ingest", {"source":"blank-lines", "text":raw, "record_mode":"auto"})
+        self.assertEqual(status,200)
+        self.assertEqual(json.loads(body)["ingested"],1)
+        _, body = self.request("GET", "/api/state")
+        rows = [row for row in json.loads(body)["events"] if row["source"] == "blank-lines"]
+        self.assertEqual(len(rows),1)
+        self.assertEqual(rows[0]["raw_text"], 'src=192.0.2.1 dst=198.51.100.1 action=deny\r\n')
+
     def test_uploaded_bytes_and_comma_values_are_not_mistaken_for_csv(self):
         raw = b'src=192.0.2.1 dst=198.51.100.2 action=deny note="one,two"\r\n' * 2
         status, body = self.request("POST", "/api/ingest", {"source":"file-bytes", "base64":base64.b64encode(raw).decode(), "record_mode":"auto"})

@@ -79,6 +79,8 @@ The benchmark uses synthetic records and a clearly defined fixed-mapping baselin
 
 ## Documentation
 
+- [Easy guide: problem, solution, and website steps](docs/EASY_GUIDE.md)
+
 - [Selection, competitors, ranking, blueprint and demo plan](docs/PROBLEM_STATEMENT.md)
 - [Concise architecture](docs/ARCHITECTURE.md) and [two-page PDF](output/pdf/TraceWeave-Architecture.pdf)
 - [Exact resources, dependencies and remaining domain inputs](docs/RESOURCE_MANIFEST.md)

@@ -108,6 +108,7 @@ class Handler(BaseHTTPRequestHandler):
                 if mode not in ("auto", "single", "lines"):
                     raise ValueError("Choose automatic detection, one record per line, or a single record")
                 single = mode == "single"
+                nonempty_lines = [line for line in raw.splitlines(keepends=True) if line.strip()]
                 if mode == "auto":
                     # Detect complete objects without altering their original bytes.
                     text = raw.decode("utf-8", errors="replace").strip()
@@ -118,10 +119,12 @@ class Handler(BaseHTTPRequestHandler):
                             pass
                     elif text.startswith("<") and not text[1:2].isdigit():
                         single = True
-                    elif len(raw.splitlines()) == 2 and b"," in raw.splitlines()[0]:
+                    elif len(nonempty_lines) == 2 and b"," in nonempty_lines[0]:
                         header = next(csv.reader(io.StringIO(text)), [])
                         single = len(header) > 1 and all(re.fullmatch(r"[A-Za-z_][\w. /-]*", key) for key in header)
-                records = [raw] if single else raw.splitlines(keepends=True)
+                records = [raw] if single else nonempty_lines
+                if not records:
+                    raise ValueError("Upload must contain at least one non-empty record")
                 if len(records) > 2000 or any(len(record) > 262144 for record in records):
                     raise ValueError("Limit: 2,000 records, 256 KiB per raw record")
                 workspace_limit = getattr(self, "workspace_limit", 10000)
