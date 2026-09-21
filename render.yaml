@@ -16,3 +16,5 @@ services:
         value: https://dlyxamexvbewnniwaime.supabase.co
       - key: SUPABASE_PUBLIC_KEY
         sync: false
+      - key: TRACEWEAVE_GOOGLE_ENABLED
+        value: "0"

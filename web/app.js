@@ -354,52 +354,74 @@ async function startWorkspace() {
     $('.privacy-card p').textContent = 'Processed online. Saved privately in Supabase.';
     $('.help-footer').textContent = 'The online service runs in your browser. Free hosting may take a moment to wake up after inactivity.';
     $('#import-dialog .dialog-footer span').textContent = '◇ Saved privately online';
-    $('#connections-view .page-heading p').textContent = 'Your private workspace is saved automatically.';
+    $('#connections-view .page-heading p').textContent = 'Your private workspace is stored in your account.';
     $('#ai-overview small').textContent = 'The saved model runs on the server without a paid AI API. Uncertain fields remain unassigned.';
     $('#sign-out').hidden = false;
-    if (!authenticated) return showAuth();
+    if (!authenticated) {
+      showAuth();
+      const hash = new URLSearchParams(location.hash.replace(/^#/, ''));
+      if (hash.get('type') === 'recovery' && hash.get('access_token')) {
+        recoveryToken = hash.get('access_token');
+        setAuthMode('reset');
+      } else if (new URLSearchParams(location.search).get('auth_error')) {
+        const authError = new URLSearchParams(location.search).get('auth_error');
+        $('#auth-message').textContent = authError === 'google_unconfigured' ? 'Google sign-in is not configured yet. Use email sign-in for now.' : 'Google sign-in could not be completed. Try email sign-in or try Google again.';
+        $('#auth-message').classList.add('auth-error');
+      }
+      return;
+    }
   }
   $('#auth-screen').hidden = true;
   $('.sidebar').hidden = false; $('.workspace').hidden = false;
   await refresh(); loadModelInfo();
 }
-let authBusy = false, authMode = 'signin';
+let authBusy = false, authMode = 'signin', recoveryToken = '';
 function setAuthMode(mode) {
   if (authBusy) return;
   authMode = mode;
-  const create = mode === 'signup';
-  $('#auth-title').textContent = create ? 'Create your account' : 'Welcome back';
-  $('#auth-description').textContent = create ? 'Enter your email and choose a password.' : 'Sign in to your workspace.';
-  $('#auth-submit').textContent = create ? 'Create account' : 'Sign in';
-  $('#auth-password').autocomplete = create ? 'new-password' : 'current-password';
-  $('#auth-password').minLength = create ? 12 : 1;
+  const create = mode === 'signup', recover = mode === 'recover', reset = mode === 'reset';
+  $('#auth-title').textContent = create ? 'Create your account' : recover ? 'Reset your password' : reset ? 'Choose a new password' : 'Welcome back';
+  $('#auth-description').textContent = create ? 'Enter your email and choose a password.' : recover ? 'Enter your email and we’ll send a reset link.' : reset ? 'Choose a new password for your workspace.' : 'Sign in to your workspace.';
+  $('#auth-submit').textContent = create ? 'Create account' : recover ? 'Send reset link' : reset ? 'Save new password' : 'Sign in';
+  $('#auth-password').autocomplete = create || reset ? 'new-password' : 'current-password';
+  $('#auth-password').minLength = create || reset ? 8 : 1;
   $('#auth-password').value = ''; $('#auth-confirm').value = '';
   $('#auth-password').type = 'password';
   $('#auth-reveal').textContent = 'Show'; $('#auth-reveal').setAttribute('aria-label','Show password'); $('#auth-reveal').setAttribute('aria-pressed','false');
   $('#auth-confirm').setCustomValidity('');
-  $('#auth-confirm').disabled = !create; $('#auth-confirm').required = create;
-  $('#auth-confirm-field').hidden = !create; $('#auth-password-hint').hidden = !create;
-  $('#auth-registration-note').hidden = !create;
+  $('#auth-email').disabled = reset; $('#auth-email').required = !reset;
+  $('#auth-password').required = !recover; $('#auth-password-field').hidden = recover;
+  $('#auth-confirm').disabled = !(create || reset); $('#auth-confirm').required = create || reset;
+  $('#auth-confirm-field').hidden = !(create || reset); $('#auth-password-hint').hidden = !(create || reset);
+  $('#auth-email-field').hidden = reset;
+  $('#auth-forgot').hidden = !(!create && !recover && !reset);
+  $('#auth-divider').hidden = !(!create && !recover && !reset);
+  $('#auth-google').hidden = !(!create && !recover && !reset);
+  $('#auth-back').hidden = !recover && !reset;
+  $('.auth-modes').hidden = recover || reset;
   $('#auth-message').textContent = ''; $('#auth-message').classList.remove('auth-error');
-  for (const [id, active] of [['auth-signin', !create], ['auth-create', create]]) {
+  for (const [id, active] of [['auth-signin', mode === 'signin'], ['auth-create', create]]) {
     $('#' + id).classList.toggle('selected', active);
     $('#' + id).setAttribute('aria-pressed', String(active));
   }
 }
 async function authenticate() {
-  const create = authMode === 'signup';
-  $('#auth-confirm').setCustomValidity(create && $('#auth-password').value !== $('#auth-confirm').value ? 'Passwords do not match.' : '');
+  const create = authMode === 'signup', recover = authMode === 'recover', reset = authMode === 'reset';
+  $('#auth-confirm').setCustomValidity((create || reset) && $('#auth-password').value !== $('#auth-confirm').value ? 'Passwords do not match.' : '');
   if (authBusy || !$('#auth-form').reportValidity()) return;
   authBusy = true; $('#auth-submit').disabled = true; $('#auth-create').disabled = true; $('#auth-signin').disabled = true;
   $('#auth-message').classList.remove('auth-error');
-  $('#auth-message').textContent = create ? 'Creating your account…' : 'Opening your workspace…';
+  $('#auth-message').textContent = create ? 'Creating your account…' : recover ? 'Sending reset link…' : reset ? 'Updating your password…' : 'Opening your workspace…';
   try {
-    const result = await api(create ? '/api/auth/signup' : '/api/auth/login', {email:$('#auth-email').value.trim(), password:$('#auth-password').value});
+    const endpoint = create ? '/api/auth/signup' : recover ? '/api/auth/recover' : reset ? '/api/auth/reset' : '/api/auth/login';
+    const payload = recover ? {email:$('#auth-email').value.trim()} : reset ? {token:recoveryToken, password:$('#auth-password').value} : {email:$('#auth-email').value.trim(), password:$('#auth-password').value};
+    const result = await api(endpoint, payload);
     $('#auth-password').value = ''; $('#auth-confirm').value = '';
-    if (create) {
+    if (create || recover) {
       authBusy = false; setAuthMode('signin');
-      $('#auth-message').textContent = 'Check your email to confirm your account, then sign in here.';
+      $('#auth-message').textContent = create ? 'Check your email to confirm your account, then sign in here.' : result.message;
     }
+    else if (reset) { recoveryToken = ''; history.replaceState(null, '', location.pathname); $('#auth-message').textContent = ''; await startWorkspace(); }
     else { $('#auth-message').textContent = ''; await startWorkspace(); }
   } catch (error) { $('#auth-message').textContent = error.message; $('#auth-message').classList.add('auth-error'); }
   finally { authBusy = false; $('#auth-submit').disabled = false; $('#auth-create').disabled = false; $('#auth-signin').disabled = false; }
@@ -407,6 +429,8 @@ async function authenticate() {
 $('#auth-form').addEventListener('submit', event => { event.preventDefault(); authenticate(); });
 $('#auth-create').addEventListener('click', () => setAuthMode('signup'));
 $('#auth-signin').addEventListener('click', () => setAuthMode('signin'));
+$('#auth-forgot').addEventListener('click', () => setAuthMode('recover'));
+$('#auth-back').addEventListener('click', () => setAuthMode('signin'));
 $('#auth-confirm').addEventListener('input', () => $('#auth-confirm').setCustomValidity(''));
 $('#auth-reveal').addEventListener('click', () => {
   const reveal = $('#auth-password').type === 'password';

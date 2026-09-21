@@ -19,13 +19,16 @@
       <div class="auth-modes" role="group" aria-label="Account access"><button type="button" id="auth-signin" class="selected" aria-pressed="true">Sign in</button><button type="button" id="auth-create" aria-pressed="false">Create account</button></div>
       <form id="auth-form" class="auth-card">
         <h1 id="auth-title">Welcome back</h1><p id="auth-description">Sign in to your workspace.</p>
-        <label class="field-label" for="auth-email">Email address</label><input id="auth-email" type="email" autocomplete="username" placeholder="you@company.com" required maxlength="320">
-        <label class="field-label" for="auth-password">Password</label><div class="auth-password"><input id="auth-password" type="password" autocomplete="current-password" required maxlength="1024"><button type="button" id="auth-reveal" aria-label="Show password" aria-pressed="false">Show</button></div>
-        <p id="auth-password-hint" class="auth-hint" hidden>Use at least 12 characters.</p>
+        <div id="auth-email-field"><label class="field-label" for="auth-email">Email address</label><input id="auth-email" type="email" autocomplete="username" placeholder="you@company.com" required maxlength="320"></div>
+        <div id="auth-password-field"><label class="field-label" for="auth-password">Password</label><div class="auth-password"><input id="auth-password" type="password" autocomplete="current-password" required maxlength="1024"><button type="button" id="auth-reveal" aria-label="Show password" aria-pressed="false">Show</button></div></div>
+        <p id="auth-password-hint" class="auth-hint" hidden>Use at least 8 characters.</p>
         <div id="auth-confirm-field" hidden><label class="field-label" for="auth-confirm">Confirm password</label><input id="auth-confirm" type="password" autocomplete="new-password" maxlength="1024" disabled></div>
         <p id="auth-message" role="status" aria-live="polite"></p>
         <button id="auth-submit" class="button primary" type="submit">Sign in</button>
-        <p id="auth-registration-note" class="auth-hint" hidden>Registration is currently limited to invited project members.</p>
+        <button id="auth-forgot" class="auth-link" type="button">Forgot password?</button>
+        <div id="auth-divider" class="auth-divider"><span>or</span></div>
+        <a id="auth-google" class="google-button" href="/api/auth/google"><span class="google-mark">G</span>Continue with Google</a>
+        <button id="auth-back" class="auth-link" type="button" hidden>Back to sign in</button>
       </form>
     </div>
   </div>

@@ -16,7 +16,7 @@ import urllib.request
 from collections import OrderedDict
 from http.cookies import SimpleCookie
 from http.server import ThreadingHTTPServer
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlencode, urlparse
 
 from .cloud import NoRedirect
 from .engine import Engine
@@ -26,6 +26,10 @@ from .server import Handler
 TABLES = {"events": 5, "contracts": 5, "results": 4, "audit": 4, "operations": 3}
 MAX_SNAPSHOT = 8 * 1024 * 1024
 COOKIE = "__Host-traceweave"
+
+
+def b64url(value):
+    return base64.urlsafe_b64encode(value).rstrip(b"=").decode("ascii")
 
 
 class RemoteError(Exception):
@@ -62,7 +66,7 @@ class Store:
             if exc.code == 409:
                 raise RemoteError("Workspace changed in another tab. Refresh before retrying.", 409) from None
             if path.startswith("/auth/"):
-                raise RemoteError("Sign-in failed. Check your credentials and email confirmation, or try again later.", 400) from None
+                raise RemoteError("Authentication failed. Confirm your email and check your details, then try again.", 400) from None
             if exc.code == 400:
                 raise RemoteError("Storage could not accept this change. Your saved workspace is unchanged; it may have reached its size limit.", 400) from None
             raise RemoteError("Cloud storage is temporarily unavailable. Refresh before retrying an upload.") from None
@@ -155,9 +159,21 @@ class HostedHandler(Handler):
     def end_headers(self):
         self.send_header("Strict-Transport-Security", "max-age=31536000")
         self.send_header("Referrer-Policy", "no-referrer")
-        if getattr(self, "cookie_header", None):
-            self.send_header("Set-Cookie", self.cookie_header)
+        for cookie in getattr(self, "cookie_headers", []):
+            self.send_header("Set-Cookie", cookie)
         super().end_headers()
+
+    def set_cookie(self, value):
+        self.cookie_headers = getattr(self, "cookie_headers", [])
+        self.cookie_headers.append(value)
+
+    def redirect(self, location, status=302):
+        self.send_response(status)
+        self.send_header("Location", location)
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("Content-Length", "0")
+        self.end_headers()
 
     def session(self):
         cookie = SimpleCookie()
@@ -208,16 +224,59 @@ class HostedHandler(Handler):
             if not mutation and path in ("/", "/app.js", "/style.css"):
                 return super().do_GET()
             if mutation and path == "/api/auth/logout":
-                self.cookie_header = f"{COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0"
+                self.set_cookie(f"{COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0")
                 return self.send({"ok": True})
-            if mutation and path in ("/api/auth/login", "/api/auth/signup"):
+            if not mutation and path == "/api/auth/google":
+                if not self.server.google_enabled:
+                    return self.redirect("/?auth_error=google_unconfigured")
+                verifier = b64url(os.urandom(48))
+                state = b64url(os.urandom(24))
+                challenge = b64url(hashlib.sha256(verifier.encode()).digest())
+                self.set_cookie(f"__Host-traceweave-oauth-state={state}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600")
+                self.set_cookie(f"__Host-traceweave-oauth-verifier={verifier}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600")
+                query = urlencode({"provider": "google", "redirect_to": self.server.origin + "/",
+                    "code_challenge": challenge, "code_challenge_method": "S256"})
+                return self.redirect(self.server.store.url + "/auth/v1/authorize?" + query)
+            if not mutation and path in ("/api/auth/google/callback", "/") and parse_qs(urlparse(self.path).query).get("code"):
+                cookies = SimpleCookie(); cookies.load(self.headers.get("Cookie", ""))
+                query = parse_qs(urlparse(self.path).query)
+                state = cookies.get("__Host-traceweave-oauth-state")
+                verifier = cookies.get("__Host-traceweave-oauth-verifier")
+                if not state or not verifier or not query.get("state") or state.value != query["state"][0] or not query.get("code"):
+                    return self.redirect("/?auth_error=oauth")
+                result = self.server.store.request("/auth/v1/token?grant_type=pkce", body={
+                    "auth_code": query["code"][0], "code_verifier": verifier.value})
+                token = result.get("access_token", "")
+                if not re.fullmatch(r"[A-Za-z0-9_.-]+", token):
+                    return self.redirect("/?auth_error=oauth")
+                age = min(int(result.get("expires_in", 3600)), 3600)
+                self.set_cookie(f"{COOKIE}={token}; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age={age}")
+                self.set_cookie("__Host-traceweave-oauth-state=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0")
+                self.set_cookie("__Host-traceweave-oauth-verifier=; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0")
+                return self.redirect("/")
+            if mutation and path in ("/api/auth/login", "/api/auth/signup", "/api/auth/recover", "/api/auth/reset"):
                 _, data = self.read_json(8192)
                 email, password = data.get("email"), data.get("password")
+                if path.endswith("recover"):
+                    if not isinstance(email, str) or len(email) > 320:
+                        raise ValueError("Enter your email address")
+                    self.server.store.request("/auth/v1/recover", body={"email": email,
+                        "redirect_to": self.server.origin + "/"})
+                    return self.send({"message": "If an account exists for that email, a password reset link is on its way."})
+                if path.endswith("reset"):
+                    token = data.get("token")
+                    if not isinstance(token, str) or not re.fullmatch(r"[A-Za-z0-9_.-]+", token) or not isinstance(password, str) or len(password) > 1024:
+                        raise ValueError("Enter a valid new password")
+                    if len(password) < 8:
+                        raise ValueError("Use at least 8 characters for your password")
+                    self.server.store.request("/auth/v1/user", token=token, body={"password": password}, method="PUT")
+                    self.set_cookie(f"{COOKIE}={token}; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=3600")
+                    return self.send({"ok": True})
                 if not isinstance(email, str) or not isinstance(password, str) or len(email) > 320 or len(password) > 1024:
                     raise ValueError("Enter your email and password")
                 if path.endswith("signup"):
-                    if len(password) < 12:
-                        raise ValueError("Use at least 12 characters for your password")
+                    if len(password) < 8:
+                        raise ValueError("Use at least 8 characters for your password")
                     self.server.store.request("/auth/v1/signup", body={"email": email, "password": password})
                     return self.send({"message": "Check your email to confirm your account, then return here to sign in. If no email arrives, contact the workspace owner; Supabase restricts email delivery until an email provider is configured."})
                 result = self.server.store.request("/auth/v1/token?grant_type=password", body={"email": email, "password": password})
@@ -225,7 +284,7 @@ class HostedHandler(Handler):
                 if not re.fullmatch(r"[A-Za-z0-9_.-]+", token):
                     raise RemoteError("Could not establish a session.")
                 age = min(int(result.get("expires_in", 3600)), 3600)
-                self.cookie_header = f"{COOKIE}={token}; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age={age}"
+                self.set_cookie(f"{COOKIE}={token}; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age={age}")
                 return self.send({"ok": True})
             try:
                 token, user = self.session()
@@ -315,6 +374,7 @@ def main():
     server.public_host = public_host
     server.origin = "https://" + public_host
     server.store = store
+    server.google_enabled = os.environ.get("TRACEWEAVE_GOOGLE_ENABLED") == "1"
     print("TraceWeave online service ready", flush=True)
     info = model_info()
     print(f"Field model: {'loaded' if info['available'] else 'unavailable'}; version={info.get('version', 'none')}; inference=CPU", flush=True)
