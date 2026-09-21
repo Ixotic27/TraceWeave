@@ -310,7 +310,7 @@ function renderCloudButtons() {
 async function refreshCloud() {
   cloudState = await api('/api/cloud');
   if (cloudState.hosted) {
-    $('#cloud-status').textContent = 'Automatic saving is on';
+    $('#cloud-status').textContent = 'Workspace storage is connected';
     $('#cloud-detail').textContent = 'Original logs, field settings, review history, and activity are saved to your private Supabase workspace before a change is marked complete.';
     $('#cloud-count').textContent = 'Up to 1,000 logs and 8 MB per workspace. Your data survives service restarts.';
     $$('#connections-view .cloud-consent, #connections-view .toolbar, #connections-view .field-hint').forEach(item => item.hidden = true);
