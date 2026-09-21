@@ -11,6 +11,8 @@ Simplified the hosted workspace navigation and public-facing account experience.
 - Replaced ambiguous status glyphs with accessible outline icons.
 - Added public `web/privacy.html` and `web/terms.html` pages and linked them from the workspace footer.
 - Extended local and hosted static routing for the legal pages.
+- Added a hosted session preload state to prevent authentication view flicker on refresh.
+- Renamed the top-right connection indicator to a plain status label and replaced the refresh glyph with an outline icon.
 
 ## 2026-09-19T15:44:20.880561+00:00
 

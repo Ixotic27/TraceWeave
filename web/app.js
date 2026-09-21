@@ -21,13 +21,13 @@ function notify(message, error = false) {
 }
 function setConnection(ok) {
   connected = ok;
-  $('#connection-text').textContent = ok ? (hosted ? 'Saved online' : 'Connected locally') : 'Server unavailable';
+  $('#connection-text').textContent = ok ? (hosted ? 'Status: connected' : 'Status: local') : 'Status: unavailable';
   $('#connection-status').classList.toggle('offline', !ok);
   $('#connection-banner').hidden = ok;
   $('#connection-message').textContent = loaded
     ? 'The server stopped responding. The logs below are from the last successful update. Start run.ps1 in the project folder to reconnect.'
     : 'Start run.ps1 in the project folder, then open http://127.0.0.1:8765/. This page needs the local server to read and process your logs.';
-  if (hosted) $('#connection-message').textContent = 'The online service is waking up or reconnecting. Wait a moment, then refresh. Your saved logs remain in Supabase.';
+  if (hosted) $('#connection-message').textContent = 'The workspace is reconnecting. Wait a moment, then refresh.';
   $$('[data-import]').forEach(button => button.disabled = !ok);
   $('#verify').disabled = !ok || !state.events.length;
   $('#export').disabled = !ok || !state.counts.normalized;
@@ -291,7 +291,7 @@ $('#import-form').addEventListener('submit', async event => {
   } finally { importing = false; button.disabled = !connected; button.textContent = 'Add logs →'; }
 });
 $$('[data-import]').forEach(button => button.disabled = true);
-startWorkspace().catch(error => { setConnection(false); notify(error.message, true); });
+startWorkspace().catch(error => { document.documentElement.classList.remove('hosted-preload'); $('#boot-screen').hidden = true; setConnection(false); notify(error.message, true); });
 setInterval(() => { if (!document.hidden) refresh().catch(() => {}); }, 10000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh().catch(() => {}); });
 
@@ -309,6 +309,8 @@ function showAuth() {
 }
 async function startWorkspace() {
   const session = await api('/api/session');
+  document.documentElement.classList.remove('hosted-preload');
+  $('#boot-screen').hidden = true;
   hosted = session.hosted; authenticated = session.authenticated;
   if (hosted) {
     $('.help-footer').textContent = 'The online service runs in your browser. Free hosting may take a moment to wake up after inactivity.';
@@ -400,4 +402,3 @@ $('#sign-out').addEventListener('click', async () => {
   try { await api('/api/auth/logout', {}); location.reload(); }
   catch (error) { notify(error.message, true); }
 });
-if (hosted) showAuth();

@@ -69,6 +69,7 @@ class Handler(BaseHTTPRequestHandler):
         assets = {
             "/": ("index.html", "text/html; charset=utf-8"),
             "/app.js": ("app.js", "application/javascript"),
+            "/preload.js": ("preload.js", "application/javascript"),
             "/style.css": ("style.css", "text/css"),
             "/privacy.html": ("privacy.html", "text/html; charset=utf-8"),
             "/terms.html": ("terms.html", "text/html; charset=utf-8"),

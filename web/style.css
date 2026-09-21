@@ -55,3 +55,5 @@ dialog{border:1px solid #d8e0d2;border-radius:14px;width:min(640px,calc(100vw - 
 [hidden]{display:none!important}
 @media(max-width:760px){.auth-screen{padding:20px 16px}.auth-layout{grid-template-columns:1fr;max-width:460px;min-height:0}.auth-intro{padding:24px 28px}.auth-intro-copy,.auth-caption,.auth-pattern{display:none}.auth-panel{padding:25px 28px 38px}.auth-modes{margin-bottom:30px}.auth-card h1{font-size:30px}}
 @media(prefers-reduced-motion:reduce){.auth-screen *{transition:none}}
+
+.boot-screen{display:none}.hosted-preload .sidebar,.hosted-preload .workspace{display:none!important}.hosted-preload .boot-screen{display:grid;place-items:center;min-height:100dvh;color:var(--muted);font-size:13px}.refresh-icon{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
