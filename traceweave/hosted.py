@@ -221,7 +221,7 @@ class HostedHandler(Handler):
                 return self.send({"status": "ok"})
             if not self.local_request():
                 return self.send({"error": "This request must come from the TraceWeave website."}, 403)
-            if not mutation and path in ("/", "/app.js", "/style.css"):
+            if not mutation and path in ("/", "/app.js", "/style.css") and not (path == "/" and parse_qs(urlparse(self.path).query).get("code")):
                 return super().do_GET()
             if mutation and path == "/api/auth/logout":
                 self.set_cookie(f"{COOKIE}=; Path=/; Secure; HttpOnly; SameSite=Strict; Max-Age=0")
