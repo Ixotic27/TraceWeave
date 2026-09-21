@@ -1,5 +1,10 @@
 # TraceWeave online
 
+The account screen has distinct sign-in and registration modes, password
+visibility, and registration password confirmation. Model availability and
+version are reported in Render startup logs; inference remains CPU-based on
+the free host, using the artifact trained on the development laptop's GPU.
+
 Deployed 21 September 2026: https://traceweave.onrender.com
 
 - Render service: `srv-daokffrtqb8s73fn4340`, Singapore, **Free**.

@@ -20,6 +20,7 @@ from urllib.parse import urlparse
 
 from .cloud import NoRedirect
 from .engine import Engine
+from .learning import model_info
 from .server import Handler
 
 TABLES = {"events": 5, "contracts": 5, "results": 4, "audit": 4, "operations": 3}
@@ -315,6 +316,8 @@ def main():
     server.origin = "https://" + public_host
     server.store = store
     print("TraceWeave online service ready", flush=True)
+    info = model_info()
+    print(f"Field model: {'loaded' if info['available'] else 'unavailable'}; version={info.get('version', 'none')}; inference=CPU", flush=True)
     server.serve_forever()
 
 

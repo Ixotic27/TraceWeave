@@ -363,21 +363,58 @@ async function startWorkspace() {
   $('.sidebar').hidden = false; $('.workspace').hidden = false;
   await refresh(); loadModelInfo();
 }
-let authBusy = false;
-async function authenticate(create = false) {
+let authBusy = false, authMode = 'signin';
+function setAuthMode(mode) {
+  if (authBusy) return;
+  authMode = mode;
+  const create = mode === 'signup';
+  $('#auth-title').textContent = create ? 'Create your account' : 'Welcome back';
+  $('#auth-description').textContent = create ? 'Enter your email and choose a password.' : 'Sign in to your workspace.';
+  $('#auth-submit').textContent = create ? 'Create account' : 'Sign in';
+  $('#auth-password').autocomplete = create ? 'new-password' : 'current-password';
+  $('#auth-password').minLength = create ? 12 : 1;
+  $('#auth-password').value = ''; $('#auth-confirm').value = '';
+  $('#auth-password').type = 'password';
+  $('#auth-reveal').textContent = 'Show'; $('#auth-reveal').setAttribute('aria-label','Show password'); $('#auth-reveal').setAttribute('aria-pressed','false');
+  $('#auth-confirm').setCustomValidity('');
+  $('#auth-confirm').disabled = !create; $('#auth-confirm').required = create;
+  $('#auth-confirm-field').hidden = !create; $('#auth-password-hint').hidden = !create;
+  $('#auth-registration-note').hidden = !create;
+  $('#auth-message').textContent = ''; $('#auth-message').classList.remove('auth-error');
+  for (const [id, active] of [['auth-signin', !create], ['auth-create', create]]) {
+    $('#' + id).classList.toggle('selected', active);
+    $('#' + id).setAttribute('aria-pressed', String(active));
+  }
+}
+async function authenticate() {
+  const create = authMode === 'signup';
+  $('#auth-confirm').setCustomValidity(create && $('#auth-password').value !== $('#auth-confirm').value ? 'Passwords do not match.' : '');
   if (authBusy || !$('#auth-form').reportValidity()) return;
-  authBusy = true; $('#auth-submit').disabled = true; $('#auth-create').disabled = true;
+  authBusy = true; $('#auth-submit').disabled = true; $('#auth-create').disabled = true; $('#auth-signin').disabled = true;
+  $('#auth-message').classList.remove('auth-error');
   $('#auth-message').textContent = create ? 'Creating your account…' : 'Opening your workspace…';
   try {
     const result = await api(create ? '/api/auth/signup' : '/api/auth/login', {email:$('#auth-email').value.trim(), password:$('#auth-password').value});
-    $('#auth-password').value = '';
-    if (create) $('#auth-message').textContent = result.message;
+    $('#auth-password').value = ''; $('#auth-confirm').value = '';
+    if (create) {
+      authBusy = false; setAuthMode('signin');
+      $('#auth-message').textContent = 'Check your email to confirm your account, then sign in here.';
+    }
     else { $('#auth-message').textContent = ''; await startWorkspace(); }
-  } catch (error) { $('#auth-message').textContent = error.message; }
-  finally { authBusy = false; $('#auth-submit').disabled = false; $('#auth-create').disabled = false; }
+  } catch (error) { $('#auth-message').textContent = error.message; $('#auth-message').classList.add('auth-error'); }
+  finally { authBusy = false; $('#auth-submit').disabled = false; $('#auth-create').disabled = false; $('#auth-signin').disabled = false; }
 }
 $('#auth-form').addEventListener('submit', event => { event.preventDefault(); authenticate(); });
-$('#auth-create').addEventListener('click', () => authenticate(true));
+$('#auth-create').addEventListener('click', () => setAuthMode('signup'));
+$('#auth-signin').addEventListener('click', () => setAuthMode('signin'));
+$('#auth-confirm').addEventListener('input', () => $('#auth-confirm').setCustomValidity(''));
+$('#auth-reveal').addEventListener('click', () => {
+  const reveal = $('#auth-password').type === 'password';
+  $('#auth-password').type = reveal ? 'text' : 'password';
+  $('#auth-reveal').textContent = reveal ? 'Hide' : 'Show';
+  $('#auth-reveal').setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+  $('#auth-reveal').setAttribute('aria-pressed', String(reveal));
+});
 $('#sign-out').addEventListener('click', async () => {
   try { await api('/api/auth/logout', {}); location.reload(); }
   catch (error) { notify(error.message, true); }

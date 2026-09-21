@@ -351,3 +351,13 @@ Record the live free Render URL, applied Supabase migration, and first-account o
 - Modified: `docs/NEXT_STEPS.md`
 - Modified: `docs/SUPABASE.md`
 - Modified: `README.md`
+
+## 2026-09-21T15:13:41.753572+00:00
+
+Simplify product language; separate sign-in and registration views; report deployed model availability in startup logs.
+
+- Modified: `docs/HOSTING.md`
+- Modified: `traceweave/hosted.py`
+- Modified: `web/app.js`
+- Modified: `web/index.html`
+- Modified: `web/style.css`
