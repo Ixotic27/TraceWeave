@@ -242,7 +242,10 @@ class HostedHandler(Handler):
                 query = parse_qs(urlparse(self.path).query)
                 state = cookies.get("__Host-traceweave-oauth-state")
                 verifier = cookies.get("__Host-traceweave-oauth-verifier")
-                if not state or not verifier or not query.get("state") or state.value != query["state"][0] or not query.get("code"):
+                # Supabase's hosted PKCE callback normally returns only `code`.
+                # If it echoes state, compare it; the HttpOnly verifier cookie
+                # still binds this callback to the browser that started it.
+                if not state or not verifier or (query.get("state") and state.value != query["state"][0]) or not query.get("code"):
                     return self.redirect("/?auth_error=oauth")
                 result = self.server.store.request("/auth/v1/token?grant_type=pkce", body={
                     "auth_code": query["code"][0], "code_verifier": verifier.value})
