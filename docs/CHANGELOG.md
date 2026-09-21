@@ -2,6 +2,16 @@
 
 Changes are appended automatically. Architecture rationale is maintained in DECISIONS.md.
 
+## 2026-09-21
+
+Simplified the hosted workspace navigation and public-facing account experience.
+
+- Removed the Connections navigation page and its manual cloud-export controls from the UI; hosted persistence continues through the authenticated workspace flow.
+- Removed the storage/status card and redundant hosting copy from the workspace shell.
+- Replaced ambiguous status glyphs with accessible outline icons.
+- Added public `web/privacy.html` and `web/terms.html` pages and linked them from the workspace footer.
+- Extended local and hosted static routing for the legal pages.
+
 ## 2026-09-19T15:44:20.880561+00:00
 
 Initial delivery: analyzed seven challenges, selected SIH26156, built and tested the free local prototype; see ADR-001 through ADR-007

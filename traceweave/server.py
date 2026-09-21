@@ -70,6 +70,8 @@ class Handler(BaseHTTPRequestHandler):
             "/": ("index.html", "text/html; charset=utf-8"),
             "/app.js": ("app.js", "application/javascript"),
             "/style.css": ("style.css", "text/css"),
+            "/privacy.html": ("privacy.html", "text/html; charset=utf-8"),
+            "/terms.html": ("terms.html", "text/html; charset=utf-8"),
         }
         if path in assets:
             file, typ = assets[path]

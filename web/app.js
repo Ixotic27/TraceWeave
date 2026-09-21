@@ -8,7 +8,6 @@ const fieldHelp = {src_ip:'Where traffic came from', dst_ip:'Where traffic was g
 let state = {events:[], counts:{}, contracts:[], audit:[], targets:[]};
 let connected = false, loaded = false, refreshing = null, signature = '', filter = 'all', page = 1, selected = null, inputMethod = 'file', chosenFile = null;
 let importing = false;
-let cloudState = null, cloudBusy = false;
 let hosted = location.hostname.endsWith('.onrender.com'), authenticated = !hosted;
 const pageSize = 25;
 const number = value => Number(value || 0).toLocaleString();
@@ -35,7 +34,6 @@ function setConnection(ok) {
   $('#import-submit').disabled = !ok || importing;
   if ($('#approve')) $('#approve').disabled = !ok;
   if ($('#rollback')) $('#rollback').disabled = !ok;
-  renderCloudButtons();
 }
 async function request(path, payload) {
   let response;
@@ -130,16 +128,17 @@ function renderSources() {
     const ready = rows.filter(row => row.status === 'normalized').length;
     const review = rows.filter(isReview).length;
     const rules = state.contracts.filter(rule => rule.source === source && rule.active);
-    return `<article class="source-card"><div class="source-card-heading"><span class="source-icon" aria-hidden="true">▦</span><h2>${esc(source)}</h2></div><p>${[...new Set(rows.map(row => row.format))].map(esc).join(' · ')}</p><div class="source-stats"><div><strong>${number(rows.length)}</strong><span>Logs added</span></div><div><strong>${number(ready)}</strong><span>Ready to export</span></div><div><strong>${number(review)}</strong><span>Need review</span></div></div><div class="source-card-footer"><span>${rules.length ? `${countText(rules.length, 'format')} reviewed` : 'Field review needed'}</span><button class="button" data-source="${esc(source)}">View logs →</button></div>${rules.length ? `<details><summary>Saved field settings</summary>${rules.map(rule => `<div class="saved-rule"><strong>Settings version ${rule.version}</strong><dl>${Object.entries(JSON.parse(rule.mapping)).map(([key,target]) => `<div><dt>${esc(fieldNames[target])}</dt><dd>${esc(key)}</dd></div>`).join('')}</dl></div>`).join('')}</details>` : ''}</article>`;
-  }).join('') : '<div class="plain-empty"><span aria-hidden="true">▦</span><h2>No sources yet</h2><p>Add your first logs and give the device a name. It will appear here automatically.</p><button class="button primary" data-import>＋ Add logs</button></div>';
+    return `<article class="source-card"><div class="source-card-heading"><span class="source-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4.5h14v15H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><h2>${esc(source)}</h2></div><p>${[...new Set(rows.map(row => row.format))].map(esc).join(' · ')}</p><div class="source-stats"><div><strong>${number(rows.length)}</strong><span>Logs added</span></div><div><strong>${number(ready)}</strong><span>Ready to export</span></div><div><strong>${number(review)}</strong><span>Need review</span></div></div><div class="source-card-footer"><span>${rules.length ? `${countText(rules.length, 'format')} reviewed` : 'Field review needed'}</span><button class="button" data-source="${esc(source)}">View logs →</button></div>${rules.length ? `<details><summary>Saved field settings</summary>${rules.map(rule => `<div class="saved-rule"><strong>Settings version ${rule.version}</strong><dl>${Object.entries(JSON.parse(rule.mapping)).map(([key,target]) => `<div><dt>${esc(fieldNames[target])}</dt><dd>${esc(key)}</dd></div>`).join('')}</dl></div>`).join('')}</details>` : ''}</article>`;
+  }).join('') : '<div class="plain-empty"><span aria-hidden="true" class="empty-icon"><svg viewBox="0 0 24 24"><path d="M5 4.5h14v15H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span><h2>No sources yet</h2><p>Add your first logs and give the device a name. It will appear here automatically.</p><button class="button primary" data-import>＋ Add logs</button></div>';
 }
 function renderActivity() {
   $('#activity-list').innerHTML = state.audit.length ? state.audit.map(item => {
     const detail = JSON.parse(item.details);
     const title = item.action === 'mapping_approved' ? 'Field settings saved' : item.action === 'mapping_rollback' ? 'Earlier field settings restored' : item.action.replaceAll('_', ' ');
     const description = item.action === 'cloud_export' ? `${countText(detail.records)} sent to ${detail.destination}` : `${detail.source || ''} · Settings version ${detail.version || '—'}`;
-    return `<article class="activity-item"><span class="activity-icon" aria-hidden="true">${item.action === 'mapping_rollback' ? '↶' : '✓'}</span><div><h2>${esc(title)}</h2><p>${esc(description)}</p>${detail.validation ? `<small>${countText(detail.validation.length)} checked · ${number(detail.validation.filter(check => check.valid).length)} passed validation</small>` : ''}</div><time datetime="${esc(item.at)}">${esc(new Date(item.at).toLocaleString())}</time></article>`;
-  }).join('') + '<p class="muted">Showing the latest 30 decisions at most.</p>' : '<div class="plain-empty"><span aria-hidden="true">◷</span><h2>Your decisions will appear here</h2><p>When you save field settings or restore a previous version, we’ll record it here.</p></div>';
+    const icon = item.action === 'mapping_rollback' ? '<svg viewBox="0 0 24 24"><path d="M8 8H4l4-4"/><path d="M4 8a8 8 0 1 1 2.3 5.7"/></svg>' : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8 12 2.6 2.7 5.4-5.5"/></svg>';
+    return `<article class="activity-item"><span class="activity-icon" aria-hidden="true">${icon}</span><div><h2>${esc(title)}</h2><p>${esc(description)}</p>${detail.validation ? `<small>${countText(detail.validation.length)} checked · ${number(detail.validation.filter(check => check.valid).length)} passed validation</small>` : ''}</div><time datetime="${esc(item.at)}">${esc(new Date(item.at).toLocaleString())}</time></article>`;
+  }).join('') + '<p class="muted">Showing the latest 30 decisions at most.</p>' : '<div class="plain-empty"><span aria-hidden="true" class="empty-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.2 2"/></svg></span><h2>Your decisions will appear here</h2><p>When you save field settings or restore a previous version, we’ll record it here.</p></div>';
 }
 function changeView(view) {
   $$('.view').forEach(element => element.hidden = element.id !== `${view}-view`);
@@ -147,8 +146,7 @@ function changeView(view) {
     button.classList.toggle('active', button.dataset.view === view);
     if (button.dataset.view === view) button.setAttribute('aria-current','page'); else button.removeAttribute('aria-current');
   });
-  $('#view-label').textContent = {logs:'Logs', sources:'Sources', activity:'Activity', connections:'Connections', help:'How it works'}[view];
-  if (view === 'connections') refreshCloud().catch(error => notify(error.message,true));
+  $('#view-label').textContent = {logs:'Logs', sources:'Sources', activity:'Activity', help:'How it works'}[view];
 }
 function setFilter(value) {
   filter = value; page = 1;
@@ -301,43 +299,6 @@ function loadModelInfo() {
   api('/api/model').then(info => { if (info.available) { $('#ai-overview').hidden = false; $('#ai-overview-text').textContent = `A small model, trained on ${info.training_device}, helps suggest fields for unfamiliar logs. Known device rules take priority. You review every new structure before export.`; } }).catch(() => {});
 }
 
-function renderCloudButtons() {
-  const usable = connected && cloudState?.configured && !cloudBusy;
-  $('#cloud-check').disabled = !usable;
-  $('#cloud-send').disabled = !usable || !cloudState.pending || !$('#cloud-consent').checked;
-  $('#cloud-consent').disabled = !usable;
-}
-async function refreshCloud() {
-  cloudState = await api('/api/cloud');
-  if (cloudState.hosted) {
-    $('#cloud-status').textContent = 'Workspace storage is connected';
-    $('#cloud-detail').textContent = 'Original logs, field settings, review history, and activity are saved to your private Supabase workspace before a change is marked complete.';
-    $('#cloud-count').textContent = 'Up to 1,000 logs and 8 MB per workspace. Your data survives service restarts.';
-    $$('#connections-view .cloud-consent, #connections-view .toolbar, #connections-view .field-hint').forEach(item => item.hidden = true);
-    return;
-  }
-  $('#cloud-status').textContent = cloudState.configured ? (cloudState.connection_verified ? 'Connection checked' : 'Configured · connection not checked') : 'Local only · cloud export is off';
-  $('#cloud-detail').textContent = cloudState.configured ? `Destination: ${cloudState.destination}. Nothing is sent automatically.` : 'A dedicated Supabase project and server configuration are needed to enable this optional connection. You can keep using local uploads, review and file export.';
-  $('#cloud-count').textContent = `${countText(cloudState.pending)} ready for a new cloud export.`;
-  renderCloudButtons();
-}
-$('#cloud-consent').addEventListener('change',renderCloudButtons);
-for (const id of ['cloud-check','cloud-send']) $("#" + id).addEventListener('click',async () => {
-  if (cloudBusy) return;
-  cloudBusy = true; renderCloudButtons();
-  try {
-    if (id === 'cloud-check') { await api('/api/cloud/check',{}); notify('Supabase connection checked. No logs were sent.'); }
-    else {
-      const result = await api('/api/cloud/sync',{include_originals:$('#cloud-consent').checked});
-      $('#cloud-consent').checked = false;
-      notify(`${countText(result.sent)} sent to Supabase. ${countText(result.remaining)} remain for the next batch.`);
-      await refresh();
-    }
-    await refreshCloud();
-  } catch(error) { notify(error.message,true); }
-  finally { cloudBusy = false; renderCloudButtons(); }
-});
-
 function showAuth() {
   authenticated = false;
   state = {events:[], counts:{}, contracts:[], audit:[], targets:[]};
@@ -350,11 +311,7 @@ async function startWorkspace() {
   const session = await api('/api/session');
   hosted = session.hosted; authenticated = session.authenticated;
   if (hosted) {
-    $('.workspace-switch small').textContent = 'Privately saved online';
-    $('.privacy-card p').textContent = 'Processed online. Saved privately in Supabase.';
     $('.help-footer').textContent = 'The online service runs in your browser. Free hosting may take a moment to wake up after inactivity.';
-    $('#import-dialog .dialog-footer span').textContent = '◇ Saved privately online';
-    $('#connections-view .page-heading p').textContent = 'Your private workspace is stored in your account.';
     $('#ai-overview small').textContent = 'The saved model runs on the server without a paid AI API. Uncertain fields remain unassigned.';
     $('#sign-out').hidden = false;
     if (!authenticated) {

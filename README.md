@@ -58,7 +58,7 @@ Open [the separate workspace](http://127.0.0.1:8766).
 
 Run the Python server to process logs. The existing GitHub Pages workflow publishes static frontend files only; it cannot run this backend. When no backend is available, the page displays connection instructions and disables uploads rather than showing fabricated results. No cloud service is required for local operation.
 
-**Connections** offers optional manual export to your own Supabase project. Export includes reviewed fields and original content; keys stay on the server, and local processing continues without cloud access. Setup and current deployment status are documented in [SUPABASE.md](docs/SUPABASE.md).
+The hosted workspace saves each signed-in user’s workspace through Supabase. The main workspace keeps this detail out of the navigation; account and data handling are described in the [privacy notice](web/privacy.html) and [terms of use](web/terms.html). Setup and deployment details are documented in [SUPABASE.md](docs/SUPABASE.md).
 
 ### Local ingestion API
 

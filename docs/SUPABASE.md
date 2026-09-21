@@ -26,8 +26,9 @@ the apparent lack of free capacity. No paid upgrade was made.
 
 - Local SQLite remains the primary store. Cloud export is off by default, and
   uploads, AI suggestions, review, replay and NDJSON export require no network.
-- **Connections** shows local configuration separately from a verified remote
-  connection. Checking the connection reads the table without sending logs.
+- The hosted workspace uses the authenticated Supabase project for its own
+  workspace snapshots. The hosted UI does not expose a separate connection
+  screen.
 - An explicit **Send ready logs to Supabase** action sends at most 100 reviewed
   records and 1.5 MB per request, including original bytes, lineage and unmapped
   fields. The UI identifies this scope and requires the original-content choice.
@@ -49,8 +50,8 @@ the apparent lack of free capacity. No paid upgrade was made.
    HTTPS URL and `SUPABASE_SECRET_KEY` to a server secret key. Legacy service-role
    JWTs are supported. Never use a publishable/anonymous key for this table.
    Set `TRACEWEAVE_CLOUD_ENABLED=1` and restart `run.ps1`.
-4. Open **Connections → Check connection**. Once connected, choose the original
-   content option and send reviewed logs. Repeat for additional pending batches.
+4. For the local server’s optional export path, use the documented API/configuration
+   directly. The hosted workspace saves its own signed-in snapshots automatically.
 
 Use `TRACEWEAVE_CLOUD_ENABLED=0` for air-gapped operation. Merely adding a project
 URL does not enable export. The `.env` reader handles simple `KEY=value` lines
