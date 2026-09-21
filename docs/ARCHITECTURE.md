@@ -2,6 +2,13 @@
 
 Universal Log Pre-processing Framework. Updated September 20, 2026. The two-page handout is available at [TraceWeave-Architecture.pdf](../output/pdf/TraceWeave-Architecture.pdf); pagination and both rendered pages have been checked.
 
+September 21 hosting addition: Render Free serves the same review workflow and
+saved model. Supabase Auth gates private workspaces; an owner-scoped, revision-checked
+snapshot saves originals, results, contracts and audit history before acknowledging
+writes. Hosted storage is bounded to 1,000 records / 8 MB per user. Local deployment
+remains offline-capable. [HOSTING.md](HOSTING.md) documents this extension; the PDF
+handout currently describes the earlier local deployment and optional export.
+
 ## Problem and architectural decision
 
 Perimeter-device logs differ across vendors and firmware. Incorrect interpretation can break security analytics even when the input parses successfully. TraceWeave preserves accepted raw records and treats normalized data as versioned interpretations, with explicit review when a source structure changes.

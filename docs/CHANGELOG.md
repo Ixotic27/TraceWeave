@@ -324,3 +324,21 @@ Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
 Automatic file-change snapshot; semantic rationale belongs in docs/DECISIONS.md
 
 - Modified: `docs/VERIFICATION.md`
+
+## 2026-09-21T15:04:42.786818+00:00
+
+Add private hosted workspaces, durable Supabase storage, and Render Free deployment.
+
+- Modified: `docs/ARCHITECTURE.md`
+- Modified: `docs/DECISIONS.md`
+- Added: `docs/HOSTING.md`
+- Modified: `README.md`
+- Added: `render.yaml`
+- Modified: `scripts/changelog.py`
+- Added: `supabase/migrations/202609210001_hosted_workspaces.sql`
+- Added: `tests/test_hosted.py`
+- Added: `traceweave/hosted.py`
+- Modified: `traceweave/server.py`
+- Modified: `web/app.js`
+- Modified: `web/index.html`
+- Modified: `web/style.css`

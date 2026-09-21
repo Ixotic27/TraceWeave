@@ -133,3 +133,14 @@ Date: 20 September 2026. Status: code implemented; deployment state in SUPABASE.
 The user requested CLI setup and a dedicated project only if free. SQLite remains primary for air-gapped use. The browser never receives server secrets. Only reviewed latest revisions are sent, with retained originals and lineage, after an explicit action identifying that scope. Batches are bounded; a stable local workspace UUID and revision key make retries idempotent. Receipts advance only after remote success. Earlier cloud revisions are retained, so this is an export rather than a full backup or collaborative editing system.
 
 The migration denies anonymous/authenticated access and grants the server role SELECT and INSERT only. Redirects are refused, TLS verification remains enabled, and errors exclude remote response bodies. Cloud export is off until configured. Unit tests use a controlled transport and ordinary HTTP integration tests force cloud off even when a developer has a real .env file.
+## ADR-012 — Free hosted workspaces alongside offline deployment
+
+21 September 2026. Hosted deployment adds Supabase password authentication,
+owner-scoped RLS, and atomic revision-checked snapshots of the complete workspace.
+Render needs only a public API key plus the signed-in user's token. Full snapshots
+reuse the existing lossless engine while preserving review history across free
+host restarts; they deliberately cap a workspace at 1,000 records and 8 MB.
+Compare-and-swap rejects concurrent stale writes, and persistent operation IDs
+allow clients to deduplicate recent retries. This is a bounded online workbench,
+not the future distributed streaming architecture. Local air-gapped mode remains
+available. The GPU-trained artifact runs CPU inference on the free host.

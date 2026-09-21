@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: traceweave
+    repo: https://github.com/Ixotic27/TraceWeave
+    runtime: python
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: python -m compileall -q traceweave
+    startCommand: python -m traceweave.hosted
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.14
+      - key: SUPABASE_URL
+        value: https://dlyxamexvbewnniwaime.supabase.co
+      - key: SUPABASE_PUBLIC_KEY
+        sync: false

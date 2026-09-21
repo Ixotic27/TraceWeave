@@ -19,6 +19,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class Handler(BaseHTTPRequestHandler):
+    @property
+    def engine(self):
+        return self.server.engine
+
     def log_message(self, fmt, *args):
         pass
 
@@ -43,23 +47,25 @@ class Handler(BaseHTTPRequestHandler):
         if not self.local_request():
             return self.send({"error": "Local origin required"}, 403)
         path = urlparse(self.path).path
+        if path == "/api/session":
+            return self.send({"hosted": False, "authenticated": True})
         if path == "/api/state":
-            return self.send(self.server.engine.state())
+            return self.send(self.engine.state())
         if path == "/api/model":
             return self.send(model_info())
         if path == "/api/cloud":
             return self.send(self.server.cloud.status())
         if path == "/api/verify":
-            return self.send(self.server.engine.verify())
+            return self.send(self.engine.verify())
         if path == "/api/export":
-            rows = self.server.engine.export()
+            rows = self.engine.export()
             return self.send(("\n".join(json.dumps(r) for r in rows) + ("\n" if rows else "")).encode(), content_type="application/x-ndjson", filename="traceweave-normalized.ndjson")
         if path == "/api/history":
             try:
                 event_id = int(parse_qs(urlparse(self.path).query).get("id", ["0"])[0])
             except ValueError:
                 return self.send({"error": "Invalid event ID"}, 400)
-            return self.send(self.server.engine.history(event_id))
+            return self.send(self.engine.history(event_id))
         assets = {
             "/": ("index.html", "text/html; charset=utf-8"),
             "/app.js": ("app.js", "application/javascript"),
@@ -82,7 +88,7 @@ class Handler(BaseHTTPRequestHandler):
             data = json.loads(self.rfile.read(length))
             if not isinstance(data, dict):
                 raise ValueError("Request must be a JSON object")
-            engine = self.server.engine
+            engine = self.engine
             path = urlparse(self.path).path
             if path == "/api/cloud/check":
                 return self.send(self.server.cloud.check())
@@ -115,8 +121,9 @@ class Handler(BaseHTTPRequestHandler):
                 records = [raw] if single else raw.splitlines(keepends=True)
                 if len(records) > 2000 or any(len(record) > 262144 for record in records):
                     raise ValueError("Limit: 2,000 records, 256 KiB per raw record")
-                if len(engine.latest()) + len(records) > 10000:
-                    raise ValueError("Workspace limit: 10,000 records. Start a separate workspace with --db.")
+                workspace_limit = getattr(self, "workspace_limit", 10000)
+                if len(engine.latest()) + len(records) > workspace_limit:
+                    raise ValueError(f"Workspace limit: {workspace_limit:,} records. This upload was not saved.")
                 for record in records:
                     engine.ingest(source, record)
                 return self.send({"ingested": len(records), "source": source})

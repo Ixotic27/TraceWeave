@@ -3,7 +3,12 @@
 [![Deploy to GitHub Pages](https://github.com/Ixotic27/TraceWeave/actions/workflows/deploy.yml/badge.svg)](https://github.com/Ixotic27/TraceWeave/actions/workflows/deploy.yml)
 [![Tests & Verification](https://github.com/Ixotic27/TraceWeave/actions/workflows/test.yml/badge.svg)](https://github.com/Ixotic27/TraceWeave/actions/workflows/test.yml)
 
-A free, local workspace for making device logs consistent and understandable.
+A free workspace for making device logs consistent and understandable, available
+as an offline local app or a hosted service with private Supabase storage.
+
+For online deployment, see [HOSTING.md](docs/HOSTING.md). The Render Free service
+runs the saved GPU-trained model without a paid AI API. Hosted users sign in;
+originals, field settings and review history are saved automatically.
 
 TraceWeave retains original log bytes, normalizes reviewed source mappings, detects structural changes, and replays affected records after a correction. Every normalized field retains source lineage. Unknown or invalid records remain available but are excluded from validated export.
 

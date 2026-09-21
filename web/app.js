@@ -9,6 +9,7 @@ let state = {events:[], counts:{}, contracts:[], audit:[], targets:[]};
 let connected = false, loaded = false, refreshing = null, signature = '', filter = 'all', page = 1, selected = null, inputMethod = 'file', chosenFile = null;
 let importing = false;
 let cloudState = null, cloudBusy = false;
+let hosted = location.hostname.endsWith('.onrender.com'), authenticated = !hosted;
 const pageSize = 25;
 const number = value => Number(value || 0).toLocaleString();
 const countText = (value, noun = 'log') => `${number(value)} ${noun}${value === 1 ? '' : 's'}`;
@@ -21,12 +22,13 @@ function notify(message, error = false) {
 }
 function setConnection(ok) {
   connected = ok;
-  $('#connection-text').textContent = ok ? 'Connected locally' : 'Server unavailable';
+  $('#connection-text').textContent = ok ? (hosted ? 'Saved online' : 'Connected locally') : 'Server unavailable';
   $('#connection-status').classList.toggle('offline', !ok);
   $('#connection-banner').hidden = ok;
   $('#connection-message').textContent = loaded
     ? 'The server stopped responding. The logs below are from the last successful update. Start run.ps1 in the project folder to reconnect.'
     : 'Start run.ps1 in the project folder, then open http://127.0.0.1:8765/. This page needs the local server to read and process your logs.';
+  if (hosted) $('#connection-message').textContent = 'The online service is waking up or reconnecting. Wait a moment, then refresh. Your saved logs remain in Supabase.';
   $$('[data-import]').forEach(button => button.disabled = !ok);
   $('#verify').disabled = !ok || !state.events.length;
   $('#export').disabled = !ok || !state.counts.normalized;
@@ -39,14 +41,15 @@ async function request(path, payload) {
   let response;
   try {
     response = await fetch(path, {
-      ...(payload === undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}),
-      cache:'no-store', signal:AbortSignal.timeout(15000)
+      ...(payload === undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json', 'Idempotency-Key':crypto.randomUUID()}, body:JSON.stringify(payload)}),
+      cache:'no-store', signal:AbortSignal.timeout(hosted ? 60000 : 15000)
     });
   } catch {
     setConnection(false);
-    throw new Error('Cannot reach the local server. Start run.ps1, then try again.');
+    throw new Error(hosted ? 'The service is reconnecting. Refresh to see whether your change was saved before trying again.' : 'Cannot reach the local server. Start run.ps1, then try again.');
   }
   if (!response.ok) {
+    if (response.status === 401 && hosted) showAuth();
     const error = await response.json().catch(() => ({}));
     if (response.status === 404 || response.status >= 500) setConnection(false);
     throw new Error(error.error || 'The server could not complete this request.');
@@ -62,6 +65,7 @@ async function api(path, payload) {
   return response.json();
 }
 async function refresh() {
+  if (hosted && !authenticated) return;
   if (refreshing) return refreshing;
   refreshing = (async () => {
     const next = await api('/api/state');
@@ -289,11 +293,13 @@ $('#import-form').addEventListener('submit', async event => {
   } finally { importing = false; button.disabled = !connected; button.textContent = 'Add logs →'; }
 });
 $$('[data-import]').forEach(button => button.disabled = true);
-refresh().catch(() => {});
+startWorkspace().catch(error => { setConnection(false); notify(error.message, true); });
 setInterval(() => { if (!document.hidden) refresh().catch(() => {}); }, 10000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh().catch(() => {}); });
 
-api('/api/model').then(info => { if (info.available) { $('#ai-overview').hidden = false; $('#ai-overview-text').textContent = `A small local model, trained on ${info.training_device}, helps suggest fields for unfamiliar logs. Known device rules take priority. You review every new structure before export.`; } }).catch(() => {});
+function loadModelInfo() {
+  api('/api/model').then(info => { if (info.available) { $('#ai-overview').hidden = false; $('#ai-overview-text').textContent = `A small model, trained on ${info.training_device}, helps suggest fields for unfamiliar logs. Known device rules take priority. You review every new structure before export.`; } }).catch(() => {});
+}
 
 function renderCloudButtons() {
   const usable = connected && cloudState?.configured && !cloudBusy;
@@ -303,6 +309,13 @@ function renderCloudButtons() {
 }
 async function refreshCloud() {
   cloudState = await api('/api/cloud');
+  if (cloudState.hosted) {
+    $('#cloud-status').textContent = 'Automatic saving is on';
+    $('#cloud-detail').textContent = 'Original logs, field settings, review history, and activity are saved to your private Supabase workspace before a change is marked complete.';
+    $('#cloud-count').textContent = 'Up to 1,000 logs and 8 MB per workspace. Your data survives service restarts.';
+    $$('#connections-view .cloud-consent, #connections-view .toolbar, #connections-view .field-hint').forEach(item => item.hidden = true);
+    return;
+  }
   $('#cloud-status').textContent = cloudState.configured ? (cloudState.connection_verified ? 'Connection checked' : 'Configured · connection not checked') : 'Local only · cloud export is off';
   $('#cloud-detail').textContent = cloudState.configured ? `Destination: ${cloudState.destination}. Nothing is sent automatically.` : 'A dedicated Supabase project and server configuration are needed to enable this optional connection. You can keep using local uploads, review and file export.';
   $('#cloud-count').textContent = `${countText(cloudState.pending)} ready for a new cloud export.`;
@@ -324,3 +337,49 @@ for (const id of ['cloud-check','cloud-send']) $("#" + id).addEventListener('cli
   } catch(error) { notify(error.message,true); }
   finally { cloudBusy = false; renderCloudButtons(); }
 });
+
+function showAuth() {
+  authenticated = false;
+  state = {events:[], counts:{}, contracts:[], audit:[], targets:[]};
+  signature = ''; selected = null;
+  $$('dialog[open]').forEach(dialog => dialog.close());
+  $('#auth-screen').hidden = false;
+  $('.sidebar').hidden = true; $('.workspace').hidden = true;
+}
+async function startWorkspace() {
+  const session = await api('/api/session');
+  hosted = session.hosted; authenticated = session.authenticated;
+  if (hosted) {
+    $('.workspace-switch small').textContent = 'Privately saved online';
+    $('.privacy-card p').textContent = 'Processed online. Saved privately in Supabase.';
+    $('.help-footer').textContent = 'The online service runs in your browser. Free hosting may take a moment to wake up after inactivity.';
+    $('#import-dialog .dialog-footer span').textContent = '◇ Saved privately online';
+    $('#connections-view .page-heading p').textContent = 'Your private workspace is saved automatically.';
+    $('#ai-overview small').textContent = 'The saved model runs on the server without a paid AI API. Uncertain fields remain unassigned.';
+    $('#sign-out').hidden = false;
+    if (!authenticated) return showAuth();
+  }
+  $('#auth-screen').hidden = true;
+  $('.sidebar').hidden = false; $('.workspace').hidden = false;
+  await refresh(); loadModelInfo();
+}
+let authBusy = false;
+async function authenticate(create = false) {
+  if (authBusy || !$('#auth-form').reportValidity()) return;
+  authBusy = true; $('#auth-submit').disabled = true; $('#auth-create').disabled = true;
+  $('#auth-message').textContent = create ? 'Creating your account…' : 'Opening your workspace…';
+  try {
+    const result = await api(create ? '/api/auth/signup' : '/api/auth/login', {email:$('#auth-email').value.trim(), password:$('#auth-password').value});
+    $('#auth-password').value = '';
+    if (create) $('#auth-message').textContent = result.message;
+    else { $('#auth-message').textContent = ''; await startWorkspace(); }
+  } catch (error) { $('#auth-message').textContent = error.message; }
+  finally { authBusy = false; $('#auth-submit').disabled = false; $('#auth-create').disabled = false; }
+}
+$('#auth-form').addEventListener('submit', event => { event.preventDefault(); authenticate(); });
+$('#auth-create').addEventListener('click', () => authenticate(true));
+$('#sign-out').addEventListener('click', async () => {
+  try { await api('/api/auth/logout', {}); location.reload(); }
+  catch (error) { notify(error.message, true); }
+});
+if (hosted) showAuth();
